@@ -156,11 +156,11 @@ const updates = [
   }
 ];
 
-const deadlines = [
-  { date: '22', month: 'SEP', title: 'BPSC TRE 4.0', text: 'आवेदन window खुलने की तारीख', tone: 'blue', icon: 'graduation' },
-  { date: '28', month: 'SEP', title: 'RRB NTPC CBT-2', text: 'परीक्षा की संभावित तारीख', tone: 'orange', icon: 'calendar' },
-  { date: '05', month: 'OCT', title: 'UPSC CDS II', text: 'अगला document update', tone: 'purple', icon: 'file' },
-  { date: '14', month: 'OCT', title: 'SSC CGL 2026', text: 'Online form की अंतिम तिथि', tone: 'green', icon: 'clock' }
+const previewCalendarEvents = [
+  { date: '2026-09-22', title: 'BPSC TRE 4.0', text: 'Application window / notice check', tone: 'blue', articleId: 'bpsc-tre' },
+  { date: '2026-09-28', title: 'RRB NTPC CBT-2', text: 'Exam date', tone: 'orange', articleId: 'rrb-ntpc' },
+  { date: '2026-10-05', title: 'UPSC CDS II', text: 'Next document update', tone: 'purple', articleId: 'upsc-cds' },
+  { date: '2026-10-14', title: 'SSC CGL 2026', text: 'Online form last date', tone: 'green', articleId: 'ssc-cgl' }
 ];
 
 const directorySections = [
@@ -370,13 +370,23 @@ let publisherRunning = false;
 let remotePublisherState = null;
 let remoteScanBusy = false;
 let directoryFilter = 'all';
+let calendarCursor = { year: 2026, month: 8 };
+
+function renderDeadlineItems() {
+  const events = getCalendarEvents().sort((a, b) => a.date.localeCompare(b.date)).slice(0, 4);
+  if (!events.length) return `<div class="deadline-item"><div class="date-badge"><b>—</b><small>LIVE</small></div><div class="deadline-copy"><b>Official dates यहां आएंगी</b><span>Source monitor verified date का इंतजार कर रहा है</span></div>${icon('clock', 'deadline-arrow')}</div>`;
+  return events.map(event => {
+    const date = new Date(`${event.date}T00:00:00`);
+    return `<div class="deadline-item"><div class="date-badge ${event.tone || 'blue'}"><b>${date.toLocaleDateString('en-IN', { day: '2-digit' })}</b><small>${date.toLocaleDateString('en-IN', { month: 'short' }).toUpperCase()}</small></div><div class="deadline-copy"><b>${escapeHtml(event.title)}</b><span>${escapeHtml(event.text)}</span></div>${icon('chevron', 'deadline-arrow')}</div>`;
+  }).join('');
+}
 
 function render() {
   app.innerHTML = `
     <div class="site-shell">
       <div class="topline">
         <div class="container topline-inner">
-          <div class="topline-left"><span class="top-dot"></span><span>भारत का भरोसेमंद career update network</span><span class="top-separator"></span><span class="top-muted">18 सितम्बर 2026</span></div>
+          <div class="topline-left"><span class="top-dot"></span><span>भारत का भरोसेमंद career update network</span><span class="top-separator"></span><span class="top-muted">${new Intl.DateTimeFormat('hi-IN', { dateStyle: 'long' }).format(new Date())}</span></div>
           <div class="topline-right"><span class="top-muted">आपके लिए साफ, सही और समय पर</span><button class="language-toggle" data-action="language"><b>हि</b> / En</button></div>
         </div>
       </div>
@@ -435,11 +445,11 @@ function render() {
                 <button class="primary-button" data-action="scroll-updates">आज की अपडेट देखें ${icon('arrow')}</button>
                 <button class="text-button" data-action="how-it-works">कैसे काम करता है? <span class="play-circle">▶</span></button>
               </div>
-              <div class="hero-trust"><span class="avatar-stack"><i>R</i><i>S</i><i>A</i><i>+</i></span><span><b>12 लाख+</b> candidates हर महीने जुड़ते हैं</span><span class="trust-divider"></span><span class="trust-check">${icon('check')} Official links first</span></div>
+              <div class="hero-trust"><span class="avatar-stack"><i>✓</i><i>✓</i><i>✓</i><i>+</i></span><span><b>Source-first</b> career updates</span><span class="trust-divider"></span><span class="trust-check">${icon('check')} Official links first</span></div>
             </div>
             <div class="pulse-card" id="monitor">
               <div class="pulse-card-top"><div><span class="live-label"><span class="live-ring"></span> LIVE PULSE</span><h2>Updates, before<br /><span>you miss them.</span></h2></div><span class="pulse-icon">${icon('lightning')}</span></div>
-              <div class="pulse-metric"><div class="metric-number">12</div><div><span>नई updates आज</span><b>+28% <small>vs last week</small></b></div></div>
+              <div class="pulse-metric"><div class="metric-number" id="published-today">—</div><div><span>verified updates आज</span><b id="source-health">Live source state</b></div></div>
               <div class="mini-chart" aria-label="Weekly update activity"><span style="height:31%"></span><span style="height:43%"></span><span style="height:38%"></span><span style="height:57%"></span><span style="height:51%"></span><span style="height:73%"></span><span class="chart-current" style="height:94%"></span></div>
               <div class="pulse-footer"><span>${icon('clock')} Last sync <b id="sync-time">09:42:18 AM</b></span><span class="sync-status"><i></i> All systems go</span></div>
               <div class="source-strip"><span>Watching official sources</span><span class="source-badges" id="homepage-source-badges"><b>BPSC</b><b>SSC</b><b>UPSC</b><b>+110</b></span></div>
@@ -449,10 +459,10 @@ function render() {
 
         <section class="stats-section">
           <div class="container stats-grid">
-            <div class="stat-cell"><span class="stat-icon blue-icon">${icon('briefcase')}</span><div><strong>1,284</strong><span>Active updates</span></div></div>
+            <div class="stat-cell"><span class="stat-icon blue-icon">${icon('briefcase')}</span><div><strong id="published-count-stat">—</strong><span>Published updates</span></div></div>
             <div class="stat-cell"><span class="stat-icon orange-icon">${icon('globe')}</span><div><strong id="source-count-stat">113</strong><span>Live source feeds</span></div></div>
-            <div class="stat-cell"><span class="stat-icon purple-icon">${icon('external')}</span><div><strong>97%</strong><span>Direct source links</span></div></div>
-            <div class="stat-cell"><span class="stat-icon green-icon">${icon('lightning')}</span><div><strong>60 sec</strong><span>Avg. publish time</span></div></div>
+            <div class="stat-cell"><span class="stat-icon purple-icon">${icon('external')}</span><div><strong>Official</strong><span>Apply links first</span></div></div>
+            <div class="stat-cell"><span class="stat-icon green-icon">${icon('lightning')}</span><div><strong>60 sec</strong><span>Source scan interval</span></div></div>
             <div class="stat-note"><span class="note-spark">✦</span><span><b>Freshness matters.</b><br />हर update को timestamp मिलता है।</span></div>
           </div>
         </section>
@@ -474,7 +484,7 @@ function render() {
               <aside class="deadline-card">
                 <div class="deadline-header"><div><div class="section-kicker">PLAN AHEAD</div><h3>आने वाली dates</h3></div><span class="calendar-orb">${icon('calendar')}</span></div>
                 <p class="deadline-intro">अपनी तैयारी का अगला कदम पहले से जानें।</p>
-                <div class="deadline-list">${deadlines.map(item => `<div class="deadline-item"><div class="date-badge ${item.tone}"><b>${item.date}</b><small>${item.month}</small></div><div class="deadline-copy"><b>${item.title}</b><span>${item.text}</span></div>${icon('chevron', 'deadline-arrow')}</div>`).join('')}</div>
+                <div class="deadline-list" id="deadline-list">${renderDeadlineItems()}</div>
                 <button class="deadline-button" data-action="calendar">पूरा calendar देखें ${icon('arrow')}</button>
               </aside>
             </div>
@@ -529,7 +539,7 @@ function renderFeaturedLinks() {
 }
 
 function renderDirectoryPanel(section) {
-  return `<section class="directory-panel tone-${section.tone}" id="panel-${section.key}"><div class="directory-panel-head"><div class="directory-panel-icon">${icon(section.icon)}</div><div><h3>${section.title}</h3><p>${section.intro}</p></div><span class="directory-count">${section.items.length}+</span></div><div class="directory-list">${section.items.map(item => `<button class="directory-link" data-article="${item.id}"><span class="directory-bullet"></span><span class="directory-link-copy"><b>${item.title}</b><small>${item.meta}</small></span>${icon('chevron')}</button>`).join('')}</div><button class="directory-more" data-section="${section.key}">View More ${section.title} ${icon('arrow')}</button></section>`;
+  return `<section class="directory-panel tone-${section.tone}" id="panel-${section.key}"><div class="directory-panel-head"><div class="directory-panel-icon">${icon(section.icon)}</div><div><h3>${section.title}</h3><p>${section.intro}</p></div><span class="directory-count">${section.items.length}+</span></div><div class="directory-list">${section.items.map(item => `<button class="directory-link" data-article="${item.id}"><span class="directory-bullet"></span><span class="directory-link-copy"><b>${item.title}</b><small>${item.meta}</small></span>${icon('chevron')}</button>`).join('')}</div><button class="directory-more" data-section="${section.key}">${section.title} की पूरी list देखें ${icon('arrow')}</button></section>`;
 }
 
 function renderDirectory() {
@@ -572,6 +582,91 @@ function filterDirectory(value = document.querySelector('#directory-search')?.va
   });
 }
 
+function openNotifications() {
+  const modal = document.querySelector('#info-modal');
+  const published = (remotePublisherState?.articles || []).filter(article => article.status === 'published').slice(0, 8);
+  const items = published.length ? published.map(article => ({ id: article.id, title: article.title, detail: `${article.sourceName} • ${new Date(article.updatedAt || article.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}` })) : updates.slice(0, 4).map(item => ({ id: item.id, title: item.hindiTitle || item.title, detail: `${item.source} • ${item.time}` }));
+  modal.innerHTML = `<div class="info-modal-inner"><div class="info-modal-top"><div><div class="section-kicker">LIVE SOURCE ALERTS</div><h2>Latest notifications</h2><p class="calendar-subtitle">Verified updates और source activity यहां दिखाई देगी।</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="notification-list">${items.map(item => `<button class="notification-item" data-notification-article="${escapeHtml(item.id)}"><span class="notification-item-icon">${icon('bell')}</span><span><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.detail)}</small></span>${icon('chevron')}</button>`).join('')}</div><div class="calendar-foot">${icon('shield')} अंतिम आवेदन, result या download हमेशा संबंधित official website पर verify करें।</div></div>`;
+  openModal('info-modal');
+  modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
+  modal.querySelectorAll('[data-notification-article]').forEach(button => button.addEventListener('click', () => openArticle(button.dataset.notificationArticle)));
+}
+
+function normalizeCalendarDate(value) {
+  const numeric = String(value || '').match(/(\d{1,2})[/.\-](\d{1,2})[/.\-](20\d{2})/);
+  if (numeric) return `${numeric[3]}-${numeric[2].padStart(2, '0')}-${numeric[1].padStart(2, '0')}`;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+}
+
+function getCalendarEvents() {
+  const dynamicEvents = (remotePublisherState?.articles || []).filter(article => article.status === 'published').flatMap(article => (article.facts?.dates || []).map(date => ({
+    date: normalizeCalendarDate(date),
+    title: article.title,
+    text: 'Official notice date',
+    tone: 'blue',
+    articleId: article.id
+  }))).filter(event => event.date);
+  const seen = new Set();
+  const baselineEvents = remotePublisherState === null ? previewCalendarEvents : [];
+  return [...baselineEvents, ...dynamicEvents].filter(event => {
+    const key = `${event.date}:${event.title}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function renderCalendarModal() {
+  const modal = document.querySelector('#info-modal');
+  const { year, month } = calendarCursor;
+  const monthName = new Intl.DateTimeFormat('hi-IN', { month: 'long', year: 'numeric' }).format(new Date(year, month, 1));
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  const events = getCalendarEvents().filter(event => event.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`));
+  const byDate = Object.groupBy ? Object.groupBy(events, event => event.date) : events.reduce((grouped, event) => { (grouped[event.date] ||= []).push(event); return grouped; }, {});
+  const weekdays = ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'];
+  const cells = Array.from({ length: totalCells }, (_, index) => {
+    const day = index - firstDay + 1;
+    if (day < 1 || day > daysInMonth) return '<span class="calendar-day empty"></span>';
+    const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayEvents = byDate[key] || [];
+    const today = new Date();
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+    return `<div class="calendar-day ${isToday ? 'today' : ''}"><b>${day}</b>${dayEvents.slice(0, 2).map(event => `<button class="calendar-event ${event.tone || 'blue'}" data-calendar-article="${escapeHtml(event.articleId || '')}" title="${escapeHtml(event.title)}">${escapeHtml(event.title)}</button>`).join('')}</div>`;
+  }).join('');
+  const agenda = events.length ? events.map(event => `<button class="calendar-agenda-item" data-calendar-article="${escapeHtml(event.articleId || '')}"><span class="calendar-agenda-date">${new Date(`${event.date}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span><span><b>${escapeHtml(event.title)}</b><small>${escapeHtml(event.text)}</small></span>${icon('chevron')}</button>`).join('') : '<div class="calendar-empty">इस महीने के लिए कोई verified date नहीं मिली। Official source monitor नई date मिलने पर इसे update करेगा।</div>';
+  modal.innerHTML = `<div class="info-modal-inner calendar-modal-inner"><div class="info-modal-top"><div><div class="section-kicker">DEADLINES & EXAM DATES</div><h2>पूरा exam calendar</h2><p class="calendar-subtitle">महत्वपूर्ण dates, application deadlines और exam events एक जगह।</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="calendar-toolbar"><button class="calendar-nav" data-calendar-nav="-1" aria-label="Previous month">‹</button><strong>${monthName}</strong><button class="calendar-nav" data-calendar-nav="1" aria-label="Next month">›</button><button class="calendar-today" data-calendar-today>आज</button></div><div class="calendar-layout"><div><div class="calendar-weekdays">${weekdays.map(day => `<span>${day}</span>`).join('')}</div><div class="calendar-grid">${cells}</div></div><aside class="calendar-agenda"><div class="calendar-agenda-head"><b>इस महीने की dates</b><span>${events.length} events</span></div>${agenda}</aside></div><div class="calendar-foot">${icon('shield')} Dates official notification से verify करें। Calendar सुविधा planning के लिए है; final date संबंधित department की website पर मान्य होगी।</div></div>`;
+  openModal('info-modal');
+  modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
+  modal.querySelectorAll('[data-calendar-nav]').forEach(button => button.addEventListener('click', () => {
+    calendarCursor.month += Number(button.dataset.calendarNav);
+    if (calendarCursor.month < 0) { calendarCursor.month = 11; calendarCursor.year -= 1; }
+    if (calendarCursor.month > 11) { calendarCursor.month = 0; calendarCursor.year += 1; }
+    renderCalendarModal();
+  }));
+  modal.querySelector('[data-calendar-today]').addEventListener('click', () => {
+    const today = new Date();
+    calendarCursor = { year: today.getFullYear(), month: today.getMonth() };
+    renderCalendarModal();
+  });
+  modal.querySelectorAll('[data-calendar-article]').forEach(button => button.addEventListener('click', () => {
+    if (button.dataset.calendarArticle) openArticle(button.dataset.calendarArticle);
+  }));
+}
+
+function openCalendar() {
+  const today = new Date();
+  if (!getCalendarEvents().some(event => event.date.startsWith(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`))) {
+    calendarCursor = { year: 2026, month: 8 };
+  } else {
+    calendarCursor = { year: today.getFullYear(), month: today.getMonth() };
+  }
+  renderCalendarModal();
+}
+
 function bindEvents() {
   document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
     activeTab = button.dataset.filter;
@@ -588,7 +683,12 @@ function bindEvents() {
       const button = event.target.closest('[data-article]');
       if (button) openArticle(button.dataset.article);
     });
-  document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => showToast(`${button.dataset.section} section की पूरी list जल्द available होगी`)));
+  document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => {
+    directoryFilter = button.dataset.section;
+    document.querySelectorAll('[data-dir-filter]').forEach(item => item.classList.toggle('active', item.dataset.dirFilter === directoryFilter));
+    filterDirectory('');
+    document.querySelector(`#panel-${directoryFilter}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
   document.querySelector('#directory-search')?.addEventListener('input', event => filterDirectory(event.target.value));
   document.querySelectorAll('[data-dir-filter]').forEach(button => button.addEventListener('click', () => {
     directoryFilter = button.dataset.dirFilter;
@@ -599,8 +699,8 @@ function bindEvents() {
   document.querySelectorAll('[data-info]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); openInfo(button.dataset.info); }));
   document.querySelectorAll('[data-action="scroll-updates"], [data-action="all-updates"]').forEach(button => button.addEventListener('click', () => document.querySelector('#updates').scrollIntoView({ behavior: 'smooth', block: 'start' })));
   document.querySelector('[data-action="how-it-works"]')?.addEventListener('click', () => document.querySelector('#about').scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  document.querySelector('[data-action="calendar"]')?.addEventListener('click', () => showToast('Calendar view जल्द आ रहा है — dates save कर लें!'));
-  document.querySelector('[data-action="notifications"]')?.addEventListener('click', () => showToast('आप सभी latest alerts देख रहे हैं ✓'));
+  document.querySelector('[data-action="calendar"]')?.addEventListener('click', openCalendar);
+  document.querySelector('[data-action="notifications"]')?.addEventListener('click', openNotifications);
   document.querySelector('[data-action="language"]')?.addEventListener('click', () => showToast('English mode जल्द उपलब्ध होगा'));
   document.querySelector('[data-action="menu"]')?.addEventListener('click', () => document.querySelector('#main-nav').classList.toggle('open'));
   document.querySelector('[data-action="clear-search"]')?.addEventListener('click', () => { searchTerm = ''; document.querySelector('#search-input').value = ''; document.querySelector('#feed-list').innerHTML = renderFeed(); });
@@ -711,6 +811,7 @@ function openArticle(id, remoteItem = null) {
   const lastDate = detectedDates[1] || detectedDates[0] || 'Official notice में देखें';
   const sourceEvidence = item.sourceArticle?.facts?.sourceExcerpt ? `<div class="source-evidence"><span>${icon('shield')} Official source evidence</span><p>${escapeHtml(item.sourceArticle.facts.sourceExcerpt)}</p><small>Fetched: ${escapeHtml(item.sourceArticle.facts.sourceLastChecked || item.date || 'Latest scan')}</small></div>` : '';
   const extractedLinkRows = (item.sourceArticle?.facts?.officialLinks || []).slice(0, 5).map(link => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer"><span>${icon('external')} ${escapeHtml(link.label)}</span>${icon('arrow')}</a>`).join('');
+  const notificationHref = item.sourceArticle?.facts?.officialLinks?.[0]?.url || officialHref;
   const modal = document.querySelector('#article-modal');
   modal.innerHTML = `
     <div class="modal-header"><div class="modal-breadcrumb">नौकरीसेतु <span>/</span> ${item.categoryLabel} <span>/</span> Full Information</div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div>
@@ -722,7 +823,7 @@ function openArticle(id, remoteItem = null) {
         <div class="classic-info-row"><b>Post Date / Update :</b><strong>${item.date} <span class="verified-text">✓ Source checked</span></strong></div>
         <div class="classic-info-row"><b>Short Information :</b><p>${item.detail} यह page official notice के आधार पर तैयार किया गया है। यहां आपको eligibility, important dates, application fee, vacancy details, selection process, documents और direct official links एक ही जगह मिलेंगे। आवेदन करने से पहले original notification जरूर पढ़ें।</p></div>
       </div>
-      <div class="article-social-row"><span>Share this update</span><button>Telegram</button><button>WhatsApp</button><button data-action="share">Copy link</button><span class="article-updated">${icon('pulse')} Auto-checked every 60 sec</span></div>
+      <div class="article-social-row"><span>Share this update</span><button data-share="telegram">Telegram</button><button data-share="whatsapp">WhatsApp</button><button data-share="copy">Copy link</button><span class="article-updated">${icon('pulse')} Auto-checked every 60 sec</span></div>
       <div class="article-source-heading"><div><div class="section-kicker">${item.source.toUpperCase()}</div><h2>${item.title}</h2><p>Complete notification summary • official source linked below</p></div><span class="article-source-seal">${icon('shield')}<small>Source<br />verified</small></span></div>${sourceEvidence}
       <p>अगर आप <b>${item.title}</b> से जुड़ी latest information खोज रहे हैं, तो यह detailed guide आपके लिए है। किसी भी भर्ती, result, admit card या answer key के मामले में केवल headline देखना पर्याप्त नहीं होता; application window, required qualification, fee, age limit और official instructions को साथ में देखना जरूरी है। हमने इस article को उसी one-page format में व्यवस्थित किया है, जिससे candidate को अलग-अलग pages पर भटकना न पड़े।</p>
       <p>इस page पर दी गई जानकारी candidate convenience के लिए आसान भाषा में है। Notice में बाद में कोई correction, date extension या नया official link आता है, तो source monitor इस page के update record में नया timestamp जोड़ता है। अंतिम eligibility और selection का निर्णय संबंधित विभाग की original notification से ही मान्य होगा।</p>
@@ -735,14 +836,23 @@ function openArticle(id, remoteItem = null) {
       <div class="article-callout">${icon('info')} <span><b>Candidate tip:</b> Photo, signature और certificate को prescribed size/format में पहले से resize कर लें। Final submit से पहले preview में नाम, जन्मतिथि, category और uploaded files को दोबारा check करें।</span></div>
       <h2>How to Fill Form / Check Result / Download Admit Card</h2><p>नीचे general step-by-step process है। इस update के अनुसार button का नाम Apply Online, Download Admit Card, View Result या Answer Key हो सकता है:</p><ol class="numbered-list detailed-steps"><li><span>1</span><p>इस page के Important Links section में दिए गए <b>Official Website</b> button को खोलें। Domain और notice title को जरूर match करें।</p></li><li><span>2</span><p>Official portal पर registration / login करें। पहली बार user हैं तो अपना mobile number और email verify करें।</p></li><li><span>3</span><p>Notification को पूरा पढ़ें और अपनी age, qualification, category, district तथा post preference check करें।</p></li><li><span>4</span><p>Form में basic details भरें, documents upload करें और required fee online pay करें। Result/admit card के लिए roll number और date of birth सही डालें।</p></li><li><span>5</span><p>Preview page पर सभी columns ध्यान से check करके final submit करें। गलत जानकारी बाद में correction window के बिना बदल नहीं सकती।</p></li><li><span>6</span><p>Final submitted form, payment receipt, result PDF या admit card को download करके print / PDF में सुरक्षित रखें।</p></li></ol>
       <h2>Syllabus / Exam Pattern</h2><p>Exam का pattern post और recruitment board के अनुसार बदल सकता है। Preparation शुरू करने से पहले official syllabus PDF, sections, marks, duration, negative marking और qualifying criteria को verify करें।</p><div class="quick-facts syllabus-facts"><div><span>Mode</span><b>Official notice के अनुसार</b></div><div><span>Questions / Marks</span><b>Notification में देखें</b></div><div><span>Duration</span><b>Board द्वारा निर्धारित</b></div><div><span>Negative marking</span><b>Post-wise rules देखें</b></div></div>
-      <h2>Important Links</h2><div class="official-links"><a href="${officialHref}" target="_blank" rel="noreferrer"><span class="link-icon">${icon('external')}</span><span><b>Official Website / Apply Online</b><small>${item.official} • Direct source link</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon download">${icon('file')}</span><span><b>Download Notification / Details</b><small>Original notice और instructions पढ़ें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon green-link">${icon('calendar')}</span><span><b>Important Dates / Exam Schedule</b><small>Dates को save करके रखें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon purple-link">${icon('shield')}</span><span><b>Official Helpdesk / Objection Link</b><small>केवल department portal पर submit करें</small></span>${icon('arrow')}</a></div>${extractedLinkRows ? `<div class="extracted-links"><b>Source links detected from official page</b>${extractedLinkRows}</div>` : ''}
+      <h2>Important Links</h2><div class="official-links"><a href="${escapeHtml(officialHref)}" target="_blank" rel="noreferrer"><span class="link-icon">${icon('external')}</span><span><b>Official Website / Apply Online</b><small>${escapeHtml(item.official)} • Direct source link</small></span>${icon('arrow')}</a><a href="${escapeHtml(notificationHref)}" target="_blank" rel="noreferrer"><span class="link-icon download">${icon('file')}</span><span><b>Official Notification / Details</b><small>Original notice और instructions official portal पर पढ़ें</small></span>${icon('arrow')}</a><a href="${escapeHtml(notificationHref)}" target="_blank" rel="noreferrer"><span class="link-icon green-link">${icon('calendar')}</span><span><b>Important Dates / Exam Schedule</b><small>Latest dates official source से verify करें</small></span>${icon('arrow')}</a><a href="${escapeHtml(officialHref)}" target="_blank" rel="noreferrer"><span class="link-icon purple-link">${icon('shield')}</span><span><b>Official Helpdesk / Objection Link</b><small>केवल department portal पर submit करें</small></span>${icon('arrow')}</a></div>${extractedLinkRows ? `<div class="extracted-links"><b>Source links detected from official page</b>${extractedLinkRows}</div>` : ''}
       <h2>Frequently Asked Questions</h2><div class="article-faq"><details open><summary>${item.title} का official link कहां मिलेगा?</summary><p>Official website का direct link इस article के Important Links section में दिया गया है। Apply करने से पहले domain और original notification दोनों verify करें।</p></details><details><summary>क्या इस update में dates बदल सकती हैं?</summary><p>हां, department द्वारा correction, extension या revised schedule जारी किया जा सकता है। इस page का update time और official notice सबसे पहले check करें।</p></details><details><summary>Application submit करने से पहले क्या check करें?</summary><p>Eligibility, category, photo/signature, fee payment, preview और final acknowledgement को जरूर check करें।</p></details><details><summary>क्या यह government official website है?</summary><p>नहीं। नौकरीसेतु एक private information platform है। हम official sources को सरल भाषा में summarize करते हैं; अंतिम निर्णय संबंधित government department की website और notification का होगा।</p></details><details><summary>Notification PDF या admit card download नहीं हो रहा है तो क्या करें?</summary><p>Official portal का server load, browser cache और login details check करें। किसी third-party link पर personal information share न करें।</p></details></div>
       <div class="article-seo-footer"><span>${icon('check')} Content checklist complete</span><span>${icon('external')} Source linked</span><span>${icon('clock')} Last reviewed ${item.date}</span></div><div class="article-disclaimer">${icon('shield')} यह जानकारी candidate convenience के लिए है। नौकरीसेतु किसी सरकारी विभाग, परीक्षा बोर्ड या recruiting agency की official website नहीं है। सभी dates, vacancies, results और links को apply करने से पहले संबंधित official notification से verify करें।</div>
     </article><aside class="article-aside"><div class="apply-card"><span class="apply-card-label">READY TO TAKE THE NEXT STEP?</span><div class="apply-card-icon">${icon('rocket')}</div><h3>Official portal पर<br />सीधे जाएँ</h3><p>हम आपको source तक पहुंचाते हैं — final decision हमेशा official notice देखकर लें।</p><a class="apply-button" href="${officialHref}" target="_blank" rel="noreferrer">Official website खोलें ${icon('external')}</a><small>${icon('shield')} Verified domain: ${item.official}</small></div><div class="aside-card article-outline"><b>इस guide में</b><a href="#">Short Information <span>01</span></a><a href="#">Important Dates <span>02</span></a><a href="#">Fee & Eligibility <span>03</span></a><a href="#">How to apply <span>04</span></a><a href="#">Important Links <span>05</span></a><a href="#">FAQ <span>06</span></a></div><div class="aside-source-card">${icon('pulse')}<b>Auto update enabled</b><p>Official source में नया notice detect होने पर update queue में जाता है।</p></div></aside></div>`;
   openModal('article-modal');
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
-  modal.querySelectorAll('[data-action="share"]').forEach(button => button.addEventListener('click', () => showToast('Article link copy करने की सुविधा ready है')));
-  modal.querySelectorAll('[data-action="download"]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); showToast('Official document link open होगा'); }));
+  const shareUrl = `${window.location.origin}/updates/${articleSlug}`;
+  const shareText = `${item.title} — नौकरीसेतु`;
+  modal.querySelectorAll('[data-share]').forEach(button => button.addEventListener('click', async () => {
+    const channel = button.dataset.share;
+    if (channel === 'telegram') window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+    if (channel === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`, '_blank', 'noopener,noreferrer');
+    if (channel === 'copy') {
+      try { await navigator.clipboard.writeText(shareUrl); showToast('Article link copy हो गया ✓'); }
+      catch { showToast(shareUrl); }
+    }
+  }));
 }
 
 function renderSourceRegistry(state = remotePublisherState) {
@@ -768,15 +878,24 @@ function applyPublisherState(state) {
     if (!updates.some(update => update.id === item.id)) updates.unshift(item);
   });
   if (document.querySelector('#feed-list')) document.querySelector('#feed-list').innerHTML = renderFeed();
+  const deadlineList = document.querySelector('#deadline-list');
+  if (deadlineList) deadlineList.innerHTML = renderDeadlineItems();
   const online = state.sources?.filter(source => source.status === 'online').length || 0;
   const highPriority = state.sources?.filter(source => source.priority === 'high' && source.status === 'online').length || 0;
   const drafts = state.articles?.filter(article => article.status !== 'published').length || 0;
+  const publishedArticles = state.articles?.filter(article => article.status === 'published') || [];
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const publishedToday = publishedArticles.filter(article => String(article.publishedAt || article.updatedAt || article.createdAt).slice(0, 10) === todayKey).length;
   const sourceCount = state.activeSourceCount || state.sourceCount || 0;
+  document.querySelector('#published-count-stat')?.replaceChildren(document.createTextNode(String(publishedArticles.length)));
+  document.querySelector('#published-today')?.replaceChildren(document.createTextNode(String(publishedToday)));
+  document.querySelector('#source-health')?.replaceChildren(document.createTextNode(`${state.scanRunning ? 'Scanning' : `${sourceCount}-source monitor`}`));
   document.querySelector('#source-count-stat')?.replaceChildren(document.createTextNode(String(sourceCount)));
   document.querySelector('#workflow-source-count')?.replaceChildren(document.createTextNode(`${sourceCount} allowlisted portals पर नया notice आते ही signal मिलता है।`));
   const homepageBadges = document.querySelector('#homepage-source-badges');
   if (homepageBadges) homepageBadges.innerHTML = `<b>BPSC</b><b>SSC</b><b>UPSC</b><b>+${Math.max(sourceCount - 3, 0)}</b>`;
   const lastScan = state.lastScanFinishedAt ? new Date(state.lastScanFinishedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Waiting';
+  document.querySelector('#sync-time')?.replaceChildren(document.createTextNode(lastScan));
   const monitoring = document.querySelector('#publisher-monitoring');
   if (monitoring) monitoring.innerHTML = `<i></i> Monitoring ${state.activeSourceCount || state.sourceCount || 0} official sources`;
   const lastScanElement = document.querySelector('#publisher-last-scan');
