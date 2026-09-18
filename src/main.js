@@ -163,6 +163,205 @@ const deadlines = [
   { date: '14', month: 'OCT', title: 'SSC CGL 2026', text: 'Online form की अंतिम तिथि', tone: 'green', icon: 'clock' }
 ];
 
+const directorySections = [
+  {
+    key: 'result',
+    title: 'Result',
+    hindi: 'सरकारी रिजल्ट 2026',
+    icon: 'chart',
+    tone: 'red',
+    intro: 'Latest exam results, merit list और score card',
+    items: [
+      { id: 'up-dgmhup', title: 'UP DGMHUP ANM Training Selected Candidate List / Merit List 2026', meta: 'Merit List • 18 Sep 2026' },
+      { id: 'nta-ugc', title: 'NTA UGC NET Re Exam Result 2026', meta: 'Result • 18 Sep 2026' },
+      { id: 'hpsc-hcs', title: 'Haryana HPSC Civil Services HCS Mains Result 2026', meta: 'Result • 17 Sep 2026' },
+      { id: 'navy-inet', title: 'Indian Navy SSR / MR INET Result 2026', meta: 'Result • 17 Sep 2026' },
+      { id: 'uppsc-acf', title: 'UPPSC ACF RFO Mains Result 2026', meta: 'Mains Result • 16 Sep 2026' },
+      { id: 'dsssb-result', title: 'DSSSB Latest Result 2026', meta: 'Result • 16 Sep 2026' },
+      { id: 'emrs-result', title: 'EMRS Teaching and Non Teaching Tier II Final Result 2026', meta: 'Final Result • 15 Sep 2026' },
+      { id: 'railway-je-result', title: 'Railway RRB Junior Engineer JE CEN 05/2025 Result', meta: 'Result • 15 Sep 2026' },
+      { id: 'rpsc-si-result', title: 'RPSC Sub Inspector SI Physical Result 2026', meta: 'Physical Result • 14 Sep 2026' },
+      { id: 'sbi-po-score', title: 'SBI Probationary Officer PO Score Card / Marks 2026', meta: 'Score Card • 13 Sep 2026' }
+    ]
+  },
+  {
+    key: 'admit-card',
+    title: 'Admit Card',
+    hindi: 'एडमिट कार्ड 2026',
+    icon: 'file',
+    tone: 'blue',
+    intro: 'Exam date, city intimation और hall ticket',
+    items: [
+      { id: 'upsssc-forest', title: 'UPSSSC Forest Guard / Wildlife Guard Mains Exam City 2026', meta: 'Exam City • 18 Sep 2026' },
+      { id: 'dsssb-admit', title: 'DSSSB Delhi Admit Card September 2026', meta: 'Admit Card • 18 Sep 2026' },
+      { id: 'navy-admit', title: 'Indian Navy SSR / MR INET Stage II Admit Card 2026', meta: 'Admit Card • 17 Sep 2026' },
+      { id: 'sbi-clerk-date', title: 'SBI Junior Associates Clerk New Exam Date 2026', meta: 'Exam Date • 17 Sep 2026' },
+      { id: 'rrb-section', title: 'RRB Section Controller Application Status 2026', meta: 'Application Status • 16 Sep 2026' },
+      { id: 'up-police-home', title: 'UP Police Home Guard PET Admit Card 2026', meta: 'Admit Card • 16 Sep 2026' },
+      { id: 'ssc-cgl-schedule', title: 'SSC Combined Graduate Level CGL Exam Schedule 2026', meta: 'Exam Schedule • 15 Sep 2026' },
+      { id: 'patna-assistant', title: 'Patna High Court Assistant Admit Card 2026', meta: 'Admit Card • 15 Sep 2026' },
+      { id: 'upsc-cds-admit', title: 'UPSC CDS II Exam Admit Card 2026', meta: 'Admit Card • 14 Sep 2026' },
+      { id: 'isro-admit', title: 'ISRO ICRB Assistant and Other Post Admit Card 2026', meta: 'Admit Card • 13 Sep 2026' }
+    ]
+  },
+  {
+    key: 'latest-job',
+    title: 'Latest Job',
+    hindi: 'नवीनतम सरकारी नौकरी',
+    icon: 'briefcase',
+    tone: 'green',
+    intro: 'नई भर्ती, online form और vacancy notice',
+    items: [
+      { id: 'mp-teacher', title: 'MPESB Primary and Middle School Teacher Online Form 2026', meta: 'Last Date: 20/10/2026' },
+      { id: 'up-je-agri', title: 'UPSSSC Junior Engineer JE Agriculture Online Form 2026', meta: 'Last Date: 12/10/2026' },
+      { id: 'mp-police-asi', title: 'MP Police ASI, Subedar Steno Online Form 2026', meta: 'Last Date: 08/10/2026' },
+      { id: 'up-primary', title: 'UP Assistant Teacher Primary Online Form 2026', meta: 'Last Date: 14/10/2026' },
+      { id: 'ssc-je', title: 'SSC Junior Engineer JE Online Form 2026', meta: 'Last Date: 30/09/2026' },
+      { id: 'ibps-rrb', title: 'IBPS RRB 15th Online Form 2026', meta: 'Last Date: 21/09/2026' },
+      { id: 'ssc-chsl', title: 'SSC 10+2 CHSL Online Form 2026', meta: 'Last Date: 18/10/2026' },
+      { id: 'railway-paramedical', title: 'Railway RRB Paramedical Online Form 2026', meta: 'Last Date: 09/10/2026' },
+      { id: 'bihar-bpssc', title: 'Bihar Police BPSSC Company Commander Online Form 2026', meta: 'Last Date: 15/10/2026' },
+      { id: 'bank-of-india', title: 'Bank of India BOI Specialist Officers SO Online Form 2026', meta: 'Last Date: 07/10/2026' }
+    ]
+  },
+  {
+    key: 'answer-key',
+    title: 'Answer Key',
+    hindi: 'आंसर की 2026',
+    icon: 'book',
+    tone: 'orange',
+    intro: 'Answer key, response sheet और objection link',
+    items: [
+      { id: 'aiapget-key', title: 'NTA AIAPGET Final Answer Key 2026', meta: 'Final Key • 18 Sep 2026' },
+      { id: 'rssb-key', title: 'Rajasthan RSSB Computer Instructor Answer Key 2026', meta: 'Answer Key • 18 Sep 2026' },
+      { id: 'cds-key', title: 'UPSC CDS II Answer Key 2026', meta: 'Answer Key • 17 Sep 2026' },
+      { id: 'nda-key', title: 'UPSC NDA II Answer Key 2026', meta: 'Answer Key • 17 Sep 2026' },
+      { id: 'upsssc-jtc-key', title: 'UPSSSC Teacher Cadre JTC Revised Answer Key 2026', meta: 'Revised Key • 16 Sep 2026' },
+      { id: 'dsssb-mts-key', title: 'Delhi DSSSB MTS Answer Key 2026', meta: 'Answer Key • 15 Sep 2026' },
+      { id: 'ugc-net-key', title: 'NTA UGC NET Re Exam Answer Key 2026', meta: 'Answer Key • 15 Sep 2026' },
+      { id: 'bsf-key', title: 'BSF HC Ministerial and ASI Steno Answer Key 2026', meta: 'Answer Key • 14 Sep 2026' },
+      { id: 'rrb-group-key', title: 'RRB Railway Group D Answer Key 2026 CEN 09/2025', meta: 'Answer Key • 13 Sep 2026' },
+      { id: 'bpsc-key', title: 'Bihar BPSC Prosecution Officer APO Answer Key 2026', meta: 'Answer Key • 12 Sep 2026' }
+    ]
+  },
+  {
+    key: 'syllabus',
+    title: 'Syllabus',
+    hindi: 'परीक्षा सिलेबस 2026',
+    icon: 'graduation',
+    tone: 'purple',
+    intro: 'Exam pattern, syllabus और preparation guide',
+    items: [
+      { id: 'up-primary-syllabus', title: 'UP Assistant Teacher Primary Class 1 to 5 Exam Syllabus 2026', meta: 'Syllabus • Updated today' },
+      { id: 'ssc-chsl-syllabus', title: 'SSC 10+2 CHSL Tier I, Tier II Exam Syllabus 2026', meta: 'Syllabus • Updated today' },
+      { id: 'ssc-je-syllabus', title: 'SSC Junior Engineer JE Paper I & II Exam Syllabus 2026', meta: 'Syllabus • Updated today' },
+      { id: 'super-tet-syllabus', title: 'UP Super TET Assistant Teacher Syllabus 2026', meta: 'Syllabus • Updated yesterday' },
+      { id: 'upsssc-pet-syllabus', title: 'UPSSSC PET 2026 Syllabus and Exam Pattern', meta: 'Syllabus • Updated yesterday' },
+      { id: 'clat-syllabus', title: 'CLAT 2027 UG / PG Syllabus', meta: 'Syllabus • Updated 16 Sep' },
+      { id: 'uptet-syllabus', title: 'UPTET 2026 Syllabus and New Exam Pattern', meta: 'Syllabus • Updated 15 Sep' },
+      { id: 'jhtet-syllabus', title: 'Jharkhand Teacher Eligibility Test JHTET Syllabus 2026', meta: 'Syllabus • Updated 14 Sep' }
+    ]
+  },
+  {
+    key: 'admission',
+    title: 'Admission',
+    hindi: 'एडमिशन और स्कॉलरशिप',
+    icon: 'book',
+    tone: 'teal',
+    intro: 'Entrance form, counselling और scholarship',
+    items: [
+      { id: 'uprtou-phd', title: 'UPRTOU PhD Entrance Exam Admission Online Form 2026', meta: 'Admission • Apply Online' },
+      { id: 'up-scholarship', title: 'UP Scholarship Online Form 2026 (All Course)', meta: 'Scholarship • Apply Online' },
+      { id: 'iim-cat', title: 'IIM CAT Admission Online Form 2026 Date Extended', meta: 'Entrance • Date Extended' },
+      { id: 'bihar-blet', title: 'Bihar Library Eligibility Test BLET Online Form 2026', meta: 'Entrance • Apply Online' },
+      { id: 'rimcee', title: 'NTA RIMCEE Class 8th Admissions Online Form 2027', meta: 'Admission • Apply Online' },
+      { id: 'gate', title: 'IIT GATE 2027 Online Form', meta: 'Entrance • Apply Online' },
+      { id: 'neet-counselling', title: 'NEET UG 2026 Online Counselling', meta: 'Counselling • Notice' },
+      { id: 'clat-admission', title: 'CLAT 2027 Admission Online Form', meta: 'Entrance • Apply Online' }
+    ]
+  },
+  {
+    key: 'certificate',
+    title: 'Certificate',
+    hindi: 'सर्टिफिकेट डाउनलोड',
+    icon: 'file',
+    tone: 'slate',
+    intro: 'Degree, certificate और e-certificate services',
+    items: [
+      { id: 'uptet-certificate', title: 'UPTET 2026 Certificate Download', meta: 'Certificate • Download' },
+      { id: 'csjmu-certificate', title: 'CSJMU Kanpur Degree, Provisional & Migration Certificate', meta: 'Certificate • Download' },
+      { id: 'ccsu-certificate', title: 'CCSU Meerut Provisional Certificate Download', meta: 'Certificate • Download' },
+      { id: 'prsu-certificate', title: 'PRSU Prayagraj Provisional Certificate Download', meta: 'Certificate • Download' },
+      { id: 'htet-certificate', title: 'Haryana TET HTET Certificate Download', meta: 'Certificate • Download' },
+      { id: 'ctet-certificate', title: 'CTET February 2026 Certificate Download', meta: 'Certificate • Download' }
+    ]
+  },
+  {
+    key: 'outsourcing',
+    title: 'Outsourcing / Offline Jobs',
+    hindi: 'आउटसोर्सिंग और ऑफलाइन जॉब',
+    icon: 'briefcase',
+    tone: 'brown',
+    intro: 'District-wise contract और offline recruitment',
+    items: [
+      { id: 'suda-mis', title: 'UP State Urban Development SUDA MIS Assistant Recruitment 2026', meta: 'Offline Job • District-wise' },
+      { id: 'special-educator', title: 'UP Special Educator Agra, Mathura, Firozabad Online Form 2026', meta: 'Recruitment • Apply Online' },
+      { id: 'ecce-agra', title: 'UP ECCE Educator Agra Online Form 2026', meta: 'Offline Job • Apply Online' },
+      { id: 'dairy-deo', title: 'UP Dairy Development DEO Data Entry Operator Recruitment 2026', meta: 'Recruitment • Apply Online' },
+      { id: 'bocw-operator', title: 'UPBOCW Computer Operator Online Form 2026', meta: 'Recruitment • Apply Online' },
+      { id: 'rajasthan-safai', title: 'Rajasthan Safai Karamchari Worker Online Form 2026', meta: 'Recruitment • Apply Online' }
+    ]
+  },
+  {
+    key: 'important',
+    title: 'Important',
+    hindi: 'जरूरी सेवाएं और फॉर्म',
+    icon: 'shield',
+    tone: 'gold',
+    intro: 'OTR, scholarship, registration और useful tools',
+    items: [
+      { id: 'voter-id', title: 'Voter ID EPIC Download 2026', meta: 'Citizen Service' },
+      { id: 'nielit-ccc', title: 'NIELIT CCC Exam Online Form 2026', meta: 'Online Form' },
+      { id: 'up-nursing', title: 'UP Nursing Council Registration Online Form 2026', meta: 'Registration' },
+      { id: 'mp-cpct', title: 'MP CPCT Online Form 2026', meta: 'Online Form' },
+      { id: 'mp-rojgar', title: 'MP Rojgar Panjiyan Online Registration', meta: 'Registration' },
+      { id: 'ssc-otr', title: 'SSC One Time Registration OTR Online Form', meta: 'Registration' }
+    ]
+  }
+];
+
+function officialDomain(title, sectionKey) {
+  const text = title.toLowerCase();
+  if (text.includes('bpsc') || text.includes('bihar')) return 'bpsc.bihar.gov.in';
+  if (text.includes('ssc') || text.includes('dsssb')) return 'ssc.gov.in';
+  if (text.includes('upsc') || text.includes('cds') || text.includes('nda')) return 'upsc.gov.in';
+  if (text.includes('upsssc')) return 'upsssc.gov.in';
+  if (text.includes('rrb') || text.includes('railway')) return 'indianrailways.gov.in';
+  if (text.includes('ibps') || text.includes('sbi') || text.includes('bank')) return 'ibps.in';
+  if (text.includes('mpesb') || text.includes('mp police') || text.includes('mppsc')) return 'esb.mp.gov.in';
+  if (text.includes('rpsc') || text.includes('rssb') || text.includes('rajasthan')) return 'rpsc.rajasthan.gov.in';
+  if (text.includes('neet') || text.includes('nta') || text.includes('ugc')) return 'nta.ac.in';
+  if (text.includes('up ') || text.includes('uptet') || text.includes('up scholarship')) return 'up.gov.in';
+  if (text.includes('navy')) return 'joinindiannavy.gov.in';
+  if (text.includes('isro')) return 'isro.gov.in';
+  if (text.includes('ctet') || text.includes('tet')) return 'ctet.nic.in';
+  return sectionKey === 'admission' ? 'education.gov.in' : 'india.gov.in';
+}
+
+const directoryLookup = Object.fromEntries(directorySections.flatMap(section => section.items.map(item => [item.id, { ...item, category: section.key, categoryLabel: section.title, source: `${section.title} • India`, status: section.title, statusClass: section.tone === 'green' ? 'green' : section.tone === 'orange' ? 'amber' : 'blue', date: item.meta, time: 'Live', color: section.tone === 'green' ? 'green' : section.tone === 'orange' ? 'orange' : section.tone === 'purple' ? 'purple' : 'blue', icon: section.icon, tags: [section.title, '2026'], stat: 'Details देखें', official: officialDomain(item.title, section.key), detail: `${item.title} की latest verified जानकारी, important dates और official link यहां देखें।` }])));
+
+const featuredLinks = [
+  { title: 'UP Primary Teacher 2026 Apply Online', meta: 'Teacher Recruitment', id: 'up-primary' },
+  { title: 'Bihar STET 2026 Apply Online', meta: 'Bihar Education', id: 'bihar-stet' },
+  { title: 'UP Anganwadi Worker Apply Online', meta: 'Women & Child Dept.', id: 'anganwadi-worker' },
+  { title: 'SSC 10+2 CHSL Apply Online', meta: 'Central Government', id: 'ssc-chsl' },
+  { title: 'SSC Junior Engineer 2026 Apply Online', meta: 'Engineering Jobs', id: 'ssc-je' },
+  { title: 'UP Scholarship 2026 Apply Online', meta: 'Scholarship', id: 'up-scholarship' },
+  { title: 'India Post GDS Apply Online', meta: 'Postal Recruitment', id: 'india-post-gds' },
+  { title: 'IBPS RRB 15th Apply Online', meta: 'Banking Jobs', id: 'ibps-rrb' },
+  { title: 'Railway Paramedical Apply Online', meta: 'Railway Recruitment', id: 'railway-paramedical' }
+];
+
 const app = document.querySelector('#app');
 let activeTab = 'all';
 let searchTerm = '';
@@ -206,8 +405,9 @@ function render() {
           <a class="nav-item" href="#updates" data-nav="results">${icon('chart')}<span>Results</span></a>
           <a class="nav-item" href="#updates" data-nav="admit">${icon('file')}<span>Admit Card</span></a>
           <a class="nav-item" href="#updates" data-nav="answer">${icon('book')}<span>Answer Key</span></a>
-          <a class="nav-item" href="#guides" data-nav="guides">${icon('graduation')}<span>Guides & Syllabus</span></a>
-          <a class="nav-item" href="#about" data-nav="schemes">${icon('shield')}<span>Yojana</span></a>
+          <a class="nav-item" href="#directory" data-nav="syllabus">${icon('graduation')}<span>Syllabus</span></a>
+          <a class="nav-item" href="#directory" data-nav="admission">${icon('book')}<span>Admission</span></a>
+          <a class="nav-item" href="#directory" data-nav="more">${icon('menu')}<span>More Sections</span></a>
           <span class="nav-spacer"></span>
           <a class="nav-live" href="#monitor"><span class="live-ring"></span> Live Monitor</a>
         </div>
@@ -253,6 +453,8 @@ function render() {
             <div class="stat-note"><span class="note-spark">✦</span><span><b>Freshness matters.</b><br />हर update को timestamp मिलता है।</span></div>
           </div>
         </section>
+
+        ${renderDirectory()}
 
         <section class="updates-section" id="updates">
           <div class="container">
@@ -318,6 +520,18 @@ function render() {
   bindEvents();
 }
 
+function renderFeaturedLinks() {
+  return featuredLinks.map((item, index) => `<button class="featured-link" data-article="${item.id}"><span class="featured-number">${String(index + 1).padStart(2, '0')}</span><span><b>${item.title}</b><small>${item.meta}</small></span>${icon('external')}</button>`).join('');
+}
+
+function renderDirectoryPanel(section) {
+  return `<section class="directory-panel tone-${section.tone}" id="panel-${section.key}"><div class="directory-panel-head"><div class="directory-panel-icon">${icon(section.icon)}</div><div><h3>${section.title}</h3><p>${section.intro}</p></div><span class="directory-count">${section.items.length}+</span></div><div class="directory-list">${section.items.map(item => `<button class="directory-link" data-article="${item.id}"><span class="directory-bullet"></span><span class="directory-link-copy"><b>${item.title}</b><small>${item.meta}</small></span>${icon('chevron')}</button>`).join('')}</div><button class="directory-more" data-section="${section.key}">View More ${section.title} ${icon('arrow')}</button></section>`;
+}
+
+function renderDirectory() {
+  return `<section class="classic-directory" id="directory"><div class="container"><div class="directory-title-row"><div><div class="section-kicker">ONE PAGE • EVERY IMPORTANT UPDATE</div><h2>सारी जानकारी, <span>एक ही जगह।</span></h2><p>Result, admit card, latest job और बाकी सभी sections — list-wise, साफ format में।</p></div><div class="directory-search-wrap">${icon('search')}<input id="directory-search" type="search" placeholder="इस list में खोजें..." aria-label="Search all updates" /><span>⌘ K</span></div></div><div class="featured-links-card"><div class="featured-card-head"><div><b>Top Online Forms</b><span>सबसे ज्यादा देखे जाने वाले forms</span></div><span class="featured-live"><i></i> Updated today</span></div><div class="featured-links-grid">${renderFeaturedLinks()}</div></div><div class="directory-grid">${directorySections.map(renderDirectoryPanel).join('')}</div><div class="department-rail"><span class="department-label">Popular Departments</span><a href="#panel-latest-job">BPSC</a><a href="#panel-admission">UP Scholarship</a><a href="#panel-latest-job">UPSSSC</a><a href="#panel-latest-job">SSC</a><a href="#panel-result">UPSC</a><a href="#panel-admit-card">Air Force</a><a href="#panel-admit-card">Navy</a><a href="#panel-result">RPSC</a><a href="#panel-admit-card">Police</a><a href="#panel-admit-card">Railways</a></div><div class="directory-note">${icon('info')} <span><b>हर list automatic refresh होती है।</b> Notice आते ही source, update time और official link के साथ item publish queue में जुड़ता है।</span><button class="link-button" data-action="publisher">Publisher workflow देखें ${icon('arrow')}</button></div></div></section>`;
+}
+
 function renderFeed() {
   const filtered = updates.filter(item => {
     const matchesTab = activeTab === 'all' || item.category === activeTab;
@@ -336,6 +550,22 @@ function renderFeed() {
   ).join('');
 }
 
+function filterDirectory(value) {
+  const query = value.trim().toLowerCase();
+  document.querySelectorAll('.directory-panel').forEach(panel => {
+    let visible = 0;
+    panel.querySelectorAll('.directory-link').forEach(link => {
+      const matches = !query || link.textContent.toLowerCase().includes(query);
+      link.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    panel.hidden = query && visible === 0;
+  });
+  document.querySelectorAll('.featured-link').forEach(link => {
+    link.hidden = Boolean(query) && !link.textContent.toLowerCase().includes(query);
+  });
+}
+
 function bindEvents() {
   document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
     activeTab = button.dataset.filter;
@@ -345,6 +575,8 @@ function bindEvents() {
   }));
 
   document.querySelectorAll('[data-article]').forEach(button => button.addEventListener('click', () => openArticle(button.dataset.article)));
+  document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => showToast(`${button.dataset.section} section की पूरी list जल्द available होगी`)));
+  document.querySelector('#directory-search')?.addEventListener('input', event => filterDirectory(event.target.value));
   document.querySelectorAll('[data-action="publisher"]').forEach(button => button.addEventListener('click', openPublisher));
   document.querySelectorAll('[data-action="scroll-updates"], [data-action="all-updates"]').forEach(button => button.addEventListener('click', () => document.querySelector('#updates').scrollIntoView({ behavior: 'smooth', block: 'start' })));
   document.querySelector('[data-action="how-it-works"]')?.addEventListener('click', () => document.querySelector('#about').scrollIntoView({ behavior: 'smooth', block: 'start' }));
@@ -384,21 +616,60 @@ function handleKeydown(event) {
 }
 
 function openArticle(id) {
-  const item = updates.find(update => update.id === id) || updates[0];
+  const featured = featuredLinks.find(link => link.id === id);
+  const item = updates.find(update => update.id === id) || directoryLookup[id] || {
+    id,
+    category: 'jobs',
+    categoryLabel: 'Latest Job',
+    source: `${featured?.meta || 'Government Update'} • India`,
+    title: featured?.title || 'Government Recruitment Update 2026',
+    detail: `${featured?.title || 'Government Recruitment Update 2026'} की eligibility, dates, notification और official apply link की पूरी जानकारी।`,
+    stat: 'Apply Online',
+    status: 'नई भर्ती',
+    statusClass: 'green',
+    date: '18 Sep 2026',
+    time: 'Live',
+    color: 'green',
+    icon: 'briefcase',
+    tags: [featured?.meta || 'Recruitment', '2026'],
+    official: 'india.gov.in'
+  };
   const modal = document.querySelector('#article-modal');
   modal.innerHTML = `
-    <div class="modal-header"><div class="modal-breadcrumb">नौकरीसेतु <span>/</span> ${item.categoryLabel} <span>/</span> Article</div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div>
-    <div class="article-modal-grid"><article class="article-reader"><div class="article-reader-top"><span class="status-badge ${item.statusClass}"><i></i>${item.status}</span><span>Updated ${item.date}</span><span>•</span><span>${icon('clock')} 6 min read</span></div><h1>${item.title}</h1><p class="article-dek">${item.detail} यहां आपको notification का सार, जरूरी dates और official apply link एक ही जगह मिलेगा।</p><div class="author-row"><span class="author-avatar">NS</span><span><b>नौकरीसेतु Editorial Desk</b><small>Official source verified • ${item.date}</small></span><button class="share-button" data-action="share">${icon('external')} Share</button></div><div class="article-rule"></div><p>किसी भी सरकारी भर्ती या परीक्षा update में सबसे जरूरी है कि जानकारी official notice से मिलाई जाए। हमने इस page पर उपलब्ध facts को आसान भाषा में रखा है, ताकि आप बिना confusion के अगला कदम चुन सकें।</p><h2>Quick overview</h2><div class="quick-facts"><div><span>Department</span><b>${item.source.split('•')[0].trim()}</b></div><div><span>Update type</span><b>${item.categoryLabel}</b></div><div><span>Important detail</span><b>${item.stat}</b></div><div><span>Official portal</span><b>${item.official}</b></div></div><h2>इस update में क्या है?</h2><ul class="article-list"><li>${icon('check')} Official notification और direct link</li><li>${icon('check')} Eligibility, important dates और documents की checklist</li><li>${icon('check')} Apply करने का आसान step-by-step तरीका</li></ul><div class="article-callout">${icon('info')} <span><b>Candidate tip</b><br />Form submit करने से पहले अपना नाम, जन्मतिथि और uploaded documents एक बार जरूर check करें।</span></div><h2>How to apply / check ${item.categoryLabel}</h2><ol class="numbered-list"><li><span>1</span><p>नीचे दिए गए official website button से संबंधित portal खोलें।</p></li><li><span>2</span><p>Notification पढ़कर eligibility और dates verify करें।</p></li><li><span>3</span><p>Application या result page पर मांगी गई details भरें और confirmation save करें।</p></li></ol><h2>Important links</h2><div class="official-links"><a href="https://${item.official}" target="_blank" rel="noreferrer"><span class="link-icon">${icon('external')}</span><span><b>Official website</b><small>${item.official}</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon download">${icon('file')}</span><span><b>Notification / details</b><small>Official document link</small></span>${icon('arrow')}</a></div><div class="article-disclaimer">${icon('shield')} यह जानकारी candidate convenience के लिए है। अंतिम निर्णय और eligibility संबंधित official notification के अनुसार मान्य होगी।</div></article><aside class="article-aside"><div class="apply-card"><span class="apply-card-label">READY TO TAKE THE NEXT STEP?</span><div class="apply-card-icon">${icon('rocket')}</div><h3>Official portal पर<br />सीधे जाएँ</h3><p>हम आपको source तक पहुंचाते हैं — final decision हमेशा official notice देखकर लें।</p><a class="apply-button" href="https://${item.official}" target="_blank" rel="noreferrer">Official website खोलें ${icon('external')}</a><small>${icon('shield')} Verified domain: ${item.official}</small></div><div class="aside-card"><b>इस guide में</b><a href="#">Quick overview <span>01</span></a><a href="#">Eligibility & dates <span>02</span></a><a href="#">How to apply <span>03</span></a><a href="#">Important links <span>04</span></a></div></aside></div>`;
+    <div class="modal-header"><div class="modal-breadcrumb">नौकरीसेतु <span>/</span> ${item.categoryLabel} <span>/</span> Full Information</div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div>
+    <div class="article-modal-grid"><article class="article-reader sr-article">
+      <div class="article-reader-top"><span class="status-badge ${item.statusClass}"><i></i>${item.status}</span><span>Post Date / Update: ${item.date}</span><span>•</span><span>${icon('clock')} 8 min read</span></div>
+      <h1>${item.title}</h1>
+      <div class="classic-info-table">
+        <div class="classic-info-row"><b>Name Of Post :</b><strong>${item.title}</strong></div>
+        <div class="classic-info-row"><b>Post Date / Update :</b><strong>${item.date} <span class="verified-text">✓ Source checked</span></strong></div>
+        <div class="classic-info-row"><b>Short Information :</b><p>${item.detail} यह page official notice के आधार पर तैयार किया गया है। यहां आपको eligibility, important dates, application fee, vacancy details, selection process, documents और direct official links एक ही जगह मिलेंगे। आवेदन करने से पहले original notification जरूर पढ़ें।</p></div>
+      </div>
+      <div class="article-social-row"><span>Share this update</span><button>Telegram</button><button>WhatsApp</button><button data-action="share">Copy link</button><span class="article-updated">${icon('pulse')} Auto-checked every 60 sec</span></div>
+      <div class="article-source-heading"><div><div class="section-kicker">${item.source.toUpperCase()}</div><h2>${item.title}</h2><p>Complete notification summary • official source linked below</p></div><span class="article-source-seal">${icon('shield')}<small>Source<br />verified</small></span></div>
+      <p>अगर आप <b>${item.title}</b> से जुड़ी latest information खोज रहे हैं, तो यह detailed guide आपके लिए है। किसी भी भर्ती, result, admit card या answer key के मामले में केवल headline देखना पर्याप्त नहीं होता; application window, required qualification, fee, age limit और official instructions को साथ में देखना जरूरी है। हमने इस article को उसी one-page format में व्यवस्थित किया है, जिससे candidate को अलग-अलग pages पर भटकना न पड़े।</p>
+      <p>इस page पर दी गई जानकारी candidate convenience के लिए आसान भाषा में है। Notice में बाद में कोई correction, date extension या नया official link आता है, तो source monitor इस page के update record में नया timestamp जोड़ता है। अंतिम eligibility और selection का निर्णय संबंधित विभाग की original notification से ही मान्य होगा।</p>
+      <div class="article-highlight-grid"><div><span>${icon('calendar')} Important dates</span><b>Apply window और exam timeline</b></div><div><span>${icon('file')} Direct links</span><b>Official portal तक one click</b></div><div><span>${icon('shield')} Verified source</span><b>${item.official}</b></div></div>
+      <h2>Important Dates</h2><p>नीचे दिए गए dates इस update को समझने के लिए हैं। Apply करने या result check करने से पहले official notice पर latest date जरूर verify करें।</p><div class="sr-table date-table"><div class="sr-table-head"><b>Event</b><b>Date / Status</b></div><div class="sr-table-row"><span>Application / Notice Begin</span><strong>22/09/2026</strong></div><div class="sr-table-row"><span>Last Date for Apply Online</span><strong>14/10/2026</strong></div><div class="sr-table-row"><span>Last Date Pay Exam Fee</span><strong>14/10/2026</strong></div><div class="sr-table-row"><span>Exam / Result / Next Stage</span><strong>Official schedule के अनुसार</strong></div><div class="sr-table-row"><span>Correction / Objection Window</span><strong>Notice में उपलब्ध होने पर</strong></div></div>
+      <div class="article-two-col"><section><h2>Application Fee</h2><div class="sr-table compact-table"><div class="sr-table-row"><span>General / OBC / EWS</span><strong>As per notification</strong></div><div class="sr-table-row"><span>SC / ST / PH</span><strong>As per notification</strong></div><div class="sr-table-row"><span>Payment Mode</span><strong>Online fee mode</strong></div></div><p class="small-note">Fee payment के लिए Debit Card, Credit Card, Net Banking या department द्वारा दिए गए माध्यम का उपयोग करें।</p></section><section><h2>Age Limit</h2><div class="sr-table compact-table"><div class="sr-table-row"><span>Minimum Age</span><strong>18 Years</strong></div><div class="sr-table-row"><span>Maximum Age</span><strong>Notification के अनुसार</strong></div><div class="sr-table-row"><span>Age Relaxation</span><strong>Rules के अनुसार</strong></div></div><p class="small-note">Age की गणना और reserved category relaxation के लिए original notification देखें।</p></section></div>
+      <h2>Vacancy / Update Details</h2><p>इस update के मुख्य details को नीचे simple table में रखा गया है। अगर किसी particular post, region या category के लिए अलग requirement है, तो notification में दिए गए annexure को जरूर पढ़ें।</p><div class="sr-table vacancy-table"><div class="sr-table-head"><b>Post / Update</b><b>Details</b></div><div class="sr-table-row"><span>${item.categoryLabel}</span><strong>${item.stat}</strong></div><div class="sr-table-row"><span>Department / Board</span><strong>${item.source.split('•')[0].trim()}</strong></div><div class="sr-table-row"><span>Qualification</span><strong>Post के अनुसार 10th / 12th / Graduate</strong></div><div class="sr-table-row"><span>Selection Process</span><strong>Exam, document verification / notice rules</strong></div><div class="sr-table-row"><span>Job / Exam Location</span><strong>India / संबंधित State</strong></div></div>
+      <h2>Eligibility और जरूरी Documents</h2><p>Candidate को form भरने से पहले अपनी educational qualification, age, category और experience को official eligibility से match करना चाहिए। सामान्य रूप से नीचे दिए गए documents ready रखने पर application process आसान रहता है:</p><ul class="article-list detailed-list"><li>${icon('check')} शैक्षिक योग्यता की marksheet और certificate</li><li>${icon('check')} Valid photo ID proof: Aadhaar, PAN, Voter ID या अन्य accepted document</li><li>${icon('check')} Recent passport size photograph और signature की scanned file</li><li>${icon('check')} Caste / EWS / PwD / domicile certificate, यदि लागू हो</li><li>${icon('check')} Active mobile number, email ID और fee payment details</li><li>${icon('check')} Result या admit card के लिए registration number / roll number</li></ul>
+      <div class="article-callout">${icon('info')} <span><b>Candidate tip:</b> Photo, signature और certificate को prescribed size/format में पहले से resize कर लें। Final submit से पहले preview में नाम, जन्मतिथि, category और uploaded files को दोबारा check करें।</span></div>
+      <h2>How to Fill Form / Check Result / Download Admit Card</h2><p>नीचे general step-by-step process है। इस update के अनुसार button का नाम Apply Online, Download Admit Card, View Result या Answer Key हो सकता है:</p><ol class="numbered-list detailed-steps"><li><span>1</span><p>इस page के Important Links section में दिए गए <b>Official Website</b> button को खोलें। Domain और notice title को जरूर match करें।</p></li><li><span>2</span><p>Official portal पर registration / login करें। पहली बार user हैं तो अपना mobile number और email verify करें।</p></li><li><span>3</span><p>Notification को पूरा पढ़ें और अपनी age, qualification, category, district तथा post preference check करें।</p></li><li><span>4</span><p>Form में basic details भरें, documents upload करें और required fee online pay करें। Result/admit card के लिए roll number और date of birth सही डालें।</p></li><li><span>5</span><p>Preview page पर सभी columns ध्यान से check करके final submit करें। गलत जानकारी बाद में correction window के बिना बदल नहीं सकती।</p></li><li><span>6</span><p>Final submitted form, payment receipt, result PDF या admit card को download करके print / PDF में सुरक्षित रखें।</p></li></ol>
+      <h2>Important Links</h2><div class="official-links"><a href="https://${item.official}" target="_blank" rel="noreferrer"><span class="link-icon">${icon('external')}</span><span><b>Official Website / Apply Online</b><small>${item.official} • Direct source link</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon download">${icon('file')}</span><span><b>Download Notification / Details</b><small>Original notice और instructions पढ़ें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon green-link">${icon('calendar')}</span><span><b>Important Dates / Exam Schedule</b><small>Dates को save करके रखें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon purple-link">${icon('shield')}</span><span><b>Official Helpdesk / Objection Link</b><small>केवल department portal पर submit करें</small></span>${icon('arrow')}</a></div>
+      <h2>Frequently Asked Questions</h2><div class="article-faq"><details open><summary>${item.title} का official link कहां मिलेगा?</summary><p>Official website का direct link इस article के Important Links section में दिया गया है। Apply करने से पहले domain और original notification दोनों verify करें।</p></details><details><summary>क्या इस update में dates बदल सकती हैं?</summary><p>हां, department द्वारा correction, extension या revised schedule जारी किया जा सकता है। इस page का update time और official notice सबसे पहले check करें।</p></details><details><summary>Application submit करने से पहले क्या check करें?</summary><p>Eligibility, category, photo/signature, fee payment, preview और final acknowledgement को जरूर check करें।</p></details><details><summary>क्या यह government official website है?</summary><p>नहीं। नौकरीसेतु एक private information platform है। हम official sources को सरल भाषा में summarize करते हैं; अंतिम निर्णय संबंधित government department की website और notification का होगा।</p></details><details><summary>Notification PDF या admit card download नहीं हो रहा है तो क्या करें?</summary><p>Official portal का server load, browser cache और login details check करें। किसी third-party link पर personal information share न करें।</p></details></div>
+      <div class="article-seo-footer"><span>${icon('check')} Content checklist complete</span><span>${icon('external')} Source linked</span><span>${icon('clock')} Last reviewed ${item.date}</span></div><div class="article-disclaimer">${icon('shield')} यह जानकारी candidate convenience के लिए है। नौकरीसेतु किसी सरकारी विभाग, परीक्षा बोर्ड या recruiting agency की official website नहीं है। सभी dates, vacancies, results और links को apply करने से पहले संबंधित official notification से verify करें।</div>
+    </article><aside class="article-aside"><div class="apply-card"><span class="apply-card-label">READY TO TAKE THE NEXT STEP?</span><div class="apply-card-icon">${icon('rocket')}</div><h3>Official portal पर<br />सीधे जाएँ</h3><p>हम आपको source तक पहुंचाते हैं — final decision हमेशा official notice देखकर लें।</p><a class="apply-button" href="https://${item.official}" target="_blank" rel="noreferrer">Official website खोलें ${icon('external')}</a><small>${icon('shield')} Verified domain: ${item.official}</small></div><div class="aside-card article-outline"><b>इस guide में</b><a href="#">Short Information <span>01</span></a><a href="#">Important Dates <span>02</span></a><a href="#">Fee & Eligibility <span>03</span></a><a href="#">How to apply <span>04</span></a><a href="#">Important Links <span>05</span></a><a href="#">FAQ <span>06</span></a></div><div class="aside-source-card">${icon('pulse')}<b>Auto update enabled</b><p>Official source में नया notice detect होने पर update queue में जाता है।</p></div></aside></div>`;
   openModal('article-modal');
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
-  modal.querySelector('[data-action="share"]')?.addEventListener('click', () => showToast('Article link copy करने की सुविधा ready है'));
-  modal.querySelector('[data-action="download"]')?.addEventListener('click', event => { event.preventDefault(); showToast('Official document link open होगा'); });
+  modal.querySelectorAll('[data-action="share"]').forEach(button => button.addEventListener('click', () => showToast('Article link copy करने की सुविधा ready है')));
+  modal.querySelectorAll('[data-action="download"]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); showToast('Official document link open होगा'); }));
 }
 
 function openPublisher() {
   const modal = document.querySelector('#publisher-modal');
   modal.innerHTML = `
-    <div class="publisher-shell"><div class="publisher-header"><div><div class="publisher-overline"><span class="live-ring"></span> INTERNAL WORKSPACE <span>•</span> DEMO VIEW</div><h2>Auto Publisher <em>Console</em></h2><p>Official notice से publish-ready article तक का live workflow.</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="publisher-body"><div class="publisher-main"><div class="console-toolbar"><div><span class="console-title">Source monitor</span><span class="console-subtitle">Last scan 09:42:18 AM</span></div><span class="monitoring-pill"><i></i> Monitoring 42 sources</span></div><div class="source-monitor-card"><div class="monitor-head"><span class="monitor-icon">${icon('pulse')}</span><div><b>Official portals</b><small>RSS, sitemap & webhook signals</small></div><span class="monitor-live">LIVE</span></div><div class="source-progress"><span class="progress-fill"></span></div><div class="source-meta"><span>${icon('check')} BPSC checked</span><span>${icon('check')} SSC checked</span><span>${icon('check')} UPSC checked</span><span class="next-scan">Next scan in <b id="publisher-countdown">${countdown}s</b></span></div></div><div class="console-title-row"><span class="console-title">Recent activity</span><button class="refresh-console" data-action="refresh-console">${icon('pulse')} Refresh</button></div><div class="activity-list"><div class="activity-row"><span class="activity-dot green"></span><div><b>BPSC TRE 4.0 notice detected</b><small>Facts extracted • 8 fields verified</small></div><time>2 min</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot blue"></span><div><b>UPSC CDS II Result</b><small>Article draft generated • SEO check passed</small></div><time>1 hr</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot orange"></span><div><b>SSC CGL update</b><small>Awaiting final source confirmation</small></div><time>1 hr</time><span class="activity-state review">Review</span></div></div></div><aside class="publisher-aside"><div class="publish-score"><div class="score-ring"><strong>92</strong><small>/100</small></div><b>Content health</b><span>SEO & source checks passed</span><div class="score-bars"><i style="width:96%"></i><i style="width:88%"></i><i style="width:93%"></i></div><small class="score-labels">Source <span>Structure</span> Links</small></div><div class="publish-settings"><span class="console-title">Publishing rules</span><label><span>Auto-publish after source verification</span><input type="checkbox" checked><i></i></label><label><span>Add FAQ + JSON-LD</span><input type="checkbox" checked><i></i></label><label><span>Send candidate alert</span><input type="checkbox" checked><i></i></label><button class="test-button" data-action="test-publish">Test publish flow ${icon('arrow')}</button></div></aside></div><div class="publisher-footer"><span>${icon('info')} Production setup में RSS/webhook credentials और CMS API जोड़ें।</span><span class="publisher-footer-links">Docs <i></i> Integrations</span></div></div>`;
+    <div class="publisher-shell"><div class="publisher-header"><div><div class="publisher-overline"><span class="live-ring"></span> INTERNAL WORKSPACE <span>•</span> DEMO VIEW</div><h2>Auto Publisher <em>Console</em></h2><p>Official notice से publish-ready article तक का live workflow.</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="publisher-body"><div class="publisher-main"><div class="console-toolbar"><div><span class="console-title">Source monitor</span><span class="console-subtitle">Last scan 09:42:18 AM • interval 60 sec</span></div><span class="monitoring-pill"><i></i> Monitoring 42 official sources</span></div><div class="pipeline-strip"><div class="pipeline-step active"><i>01</i><b>Detect</b><small>official notice</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>02</i><b>Extract</b><small>facts + dates</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>03</i><b>Optimize</b><small>SEO + schema</small></div><span>${icon('arrow')}</span><div class="pipeline-step ready"><i>04</i><b>Publish</b><small>CMS + alert</small></div></div><div class="source-monitor-card"><div class="monitor-head"><span class="monitor-icon">${icon('pulse')}</span><div><b>Official portals</b><small>RSS, sitemap & webhook signals</small></div><span class="monitor-live">LIVE</span></div><div class="source-progress"><span class="progress-fill"></span></div><div class="source-meta"><span>${icon('check')} BPSC checked</span><span>${icon('check')} SSC checked</span><span>${icon('check')} UPSC checked</span><span class="next-scan">Next scan in <b id="publisher-countdown">${countdown}s</b></span></div></div><div class="console-title-row"><span class="console-title">Recent activity</span><button class="refresh-console" data-action="refresh-console">${icon('pulse')} Refresh</button></div><div class="activity-list"><div class="activity-row"><span class="activity-dot green"></span><div><b>BPSC TRE 4.0 notice detected</b><small>Facts extracted • 8 fields verified</small></div><time>2 min</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot blue"></span><div><b>UPSC CDS II Result</b><small>Article draft generated • SEO check passed</small></div><time>1 hr</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot orange"></span><div><b>SSC CGL update</b><small>Awaiting final source confirmation</small></div><time>1 hr</time><span class="activity-state review">Review</span></div></div></div><aside class="publisher-aside"><div class="publish-score"><div class="score-ring"><strong>92</strong><small>/100</small></div><b>Content health</b><span>SEO & source checks passed</span><div class="score-bars"><i style="width:96%"></i><i style="width:88%"></i><i style="width:93%"></i></div><small class="score-labels">Source <span>Structure</span> Links</small></div><div class="publish-settings"><span class="console-title">Publishing rules</span><label><span>Auto-publish after source verification</span><input type="checkbox" checked><i></i></label><label><span>Add FAQ + JSON-LD</span><input type="checkbox" checked><i></i></label><label><span>Send candidate alert</span><input type="checkbox" checked><i></i></label><button class="test-button" data-action="test-publish">Test publish flow ${icon('arrow')}</button></div></aside></div><div class="publisher-footer"><span>${icon('info')} Production setup में RSS/webhook credentials और CMS API जोड़ें।</span><span class="publisher-footer-links">Docs <i></i> Integrations</span></div></div>`;
   openModal('publisher-modal');
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
   modal.querySelector('[data-action="test-publish"]').addEventListener('click', runPublishDemo);
