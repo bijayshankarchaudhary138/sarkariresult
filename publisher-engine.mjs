@@ -6,6 +6,8 @@ import sources from './publisher-sources.json' with { type: 'json' };
 const SCAN_INTERVAL_MS = 60_000;
 const FETCH_TIMEOUT_MS = 8_000;
 const SOURCE_CONCURRENCY = 18;
+const ROBOTS_TIMEOUT_MS = 4_000;
+const ROBOTS_RECHECK_MS = 6 * 60 * 60 * 1000;
 const MAX_EXCERPT_LENGTH = 420;
 const DATA_DIR = process.env.PUBLISHER_DATA_DIR || '.publisher-data';
 const STATE_FILE = join(DATA_DIR, 'state.json');
@@ -34,6 +36,9 @@ const state = {
     dates: [],
     links: [],
     robotsAllowed: true,
+    robotsPolicy: 'not_checked',
+    robotsCheckedAt: null,
+    nextCheckAt: null,
     changed: false,
     noticeCount: 0,
     error: null
@@ -48,6 +53,7 @@ let initialScanHandle;
 let storageReady = false;
 let storageWrite = Promise.resolve();
 let monitorReady = Promise.resolve();
+const robotsCache = new Map();
 
 function now() {
   return new Date().toISOString();
@@ -180,9 +186,102 @@ async function mapWithConcurrency(items, worker, limit = SOURCE_CONCURRENCY) {
   return results;
 }
 
+function robotsAllows(body, sourceUrl) {
+  const blocks = String(body || '').split(/\n\s*\n/);
+  const applicable = blocks.filter(block => /(^|\n)\s*user-agent\s*:\s*(\*|naukrisetu-source-monitor)\s*($|\n)/im.test(block));
+  if (!applicable.length) return true;
+  const path = new URL(sourceUrl).pathname || '/';
+  let allowLength = -1;
+  let disallowLength = -1;
+  applicable.join('\n').split(/\r?\n/).forEach(line => {
+    const match = line.trim().match(/^(allow|disallow)\s*:\s*(.*)$/i);
+    if (!match || !match[2].trim()) return;
+    const rule = match[2].trim().split('#')[0].trim();
+    if (!rule) return;
+    const patternSource = rule.split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+    const pattern = new RegExp(`^${patternSource}`);
+    if (!pattern.test(path)) return;
+    if (match[1].toLowerCase() === 'allow') allowLength = Math.max(allowLength, rule.length);
+    else disallowLength = Math.max(disallowLength, rule.length);
+  });
+  return allowLength >= disallowLength;
+}
+
+async function getRobotsPolicy(source) {
+  const origin = new URL(source.url).origin;
+  const cached = robotsCache.get(origin);
+  if (cached && Date.now() - cached.checkedAt < ROBOTS_RECHECK_MS) return cached;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ROBOTS_TIMEOUT_MS);
+  const checkedAt = Date.now();
+  try {
+    const response = await fetch(`${origin}/robots.txt`, {
+      signal: controller.signal,
+      redirect: 'follow',
+      headers: { 'user-agent': 'NaukriSetu-SourceMonitor/1.0 (+official-source-review)', accept: 'text/plain' }
+    });
+    if (!response.ok) {
+      const policy = { allowed: true, policy: 'unavailable', checkedAt };
+      robotsCache.set(origin, policy);
+      return policy;
+    }
+    const body = await response.text();
+    const allowed = robotsAllows(body, source.url);
+    const policy = { allowed, policy: allowed ? 'allowed' : 'disallowed', checkedAt };
+    robotsCache.set(origin, policy);
+    return policy;
+  } catch {
+    const policy = { allowed: true, policy: 'unavailable', checkedAt };
+    robotsCache.set(origin, policy);
+    return policy;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function sourceIsDue(source, force = false) {
+  if (force) return true;
+  const sourceState = state.sources[source.id];
+  if (sourceState.nextCheckAt && Date.parse(sourceState.nextCheckAt) > Date.now()) return false;
+  if (!sourceState.lastCheckedAt) return true;
+  const interval = Math.max(60, Number(source.pollIntervalSeconds || 60));
+  return Date.now() - Date.parse(sourceState.lastCheckedAt) >= interval * 1000;
+}
+
 async function fetchSource(source) {
   const started = Date.now();
   const sourceState = state.sources[source.id];
+  const robots = await getRobotsPolicy(source);
+  const robotsCheckedAt = new Date(robots.checkedAt).toISOString();
+  if (!robots.allowed) {
+    const checkedAt = now();
+    const result = {
+      id: source.id,
+      status: 'blocked',
+      httpStatus: null,
+      responseMs: Date.now() - started,
+      contentHash: sourceState.contentHash,
+      etag: sourceState.etag,
+      lastModified: sourceState.lastModified,
+      changed: false,
+      title: sourceState.title || `${source.name} robots policy`,
+      excerpt: sourceState.excerpt || '',
+      dates: sourceState.dates || [],
+      links: sourceState.links || [],
+      checkedAt,
+      robotsAllowed: false,
+      robotsPolicy: robots.policy,
+      robotsCheckedAt,
+      nextCheckAt: new Date(Date.now() + ROBOTS_RECHECK_MS).toISOString(),
+      error: 'Robots.txt disallows automated source polling'
+    };
+    Object.assign(sourceState, result, { lastCheckedAt: checkedAt });
+    return { source, result };
+  }
+  sourceState.robotsAllowed = true;
+  sourceState.robotsPolicy = robots.policy;
+  sourceState.robotsCheckedAt = robotsCheckedAt;
+  sourceState.nextCheckAt = null;
   let lastError;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const controller = new AbortController();
@@ -343,7 +442,8 @@ export async function scanSources({ force = false } = {}) {
   state.lastScanStartedAt = now();
   addActivity({ type: 'scan_started', title: `Scan #${state.scanNumber} started`, detail: `${sources.filter(source => source.enabled).length} allowlisted official sources checked`, status: 'running' });
   try {
-    const enabledSources = sources.filter(source => source.enabled);
+    const enabledSources = sources.filter(source => source.enabled && sourceIsDue(source, force));
+    const deferredCount = sources.filter(source => source.enabled).length - enabledSources.length;
     const results = await mapWithConcurrency(enabledSources, source => fetchSource(source));
     let changedCount = 0;
     let newDrafts = 0;
@@ -367,7 +467,8 @@ export async function scanSources({ force = false } = {}) {
         }
       }
     });
-    addActivity({ type: 'scan_finished', title: `Scan #${state.scanNumber} finished`, detail: changedCount ? `${newDrafts} article draft(s) queued for verification` : 'No new official notice fingerprint detected', status: changedCount ? 'drafts' : 'clean' });
+    const complianceNote = deferredCount ? `; ${deferredCount} source(s) deferred by polling policy` : '';
+    addActivity({ type: 'scan_finished', title: `Scan #${state.scanNumber} finished`, detail: changedCount ? `${newDrafts} article draft(s) queued for verification${complianceNote}` : `No new official notice fingerprint detected${complianceNote}`, status: changedCount ? 'drafts' : 'clean' });
     state.lastScanFinishedAt = now();
     await persistState();
   } finally {

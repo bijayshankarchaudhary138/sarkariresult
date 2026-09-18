@@ -22,7 +22,8 @@ NODE_ENV=production npm start
 
 - Classic one-page directory with **Top Online Forms**, Result, Admit Card, Latest Job, Answer Key, Syllabus, Admission, Certificate, Outsourcing / Offline Jobs and Important sections.
 - List-wise cards with category filters, View More actions, department shortcuts and a section-wide search.
-- Curated live updates feed, upcoming dates, search, tabs, timestamps and alert subscription interaction.
+- Curated live updates feed, source-backed upcoming dates and full month calendar, search, tabs, timestamps, live notifications and share links.
+- Compliance-aware polling: cached robots.txt checks, blocked-source status, six-hour policy recheck, per-source polling intervals and bounded concurrency.
 - Long-form article reader following the familiar government-job information pattern: Name of Post, Post Date / Update, Short Information, Important Dates, Application Fee, Age Limit, Vacancy / Update Details, Eligibility, documents, salary/pay scale, selection process, syllabus, how-to steps, Important Links and FAQ.
 - Official-source CTA, source evidence excerpt, source verification badge, candidate checklist, correction/terms/privacy/editorial policy surfaces and candidate disclaimer.
 - Publisher Console with a 113-source allowlisted official-source registry, a 60-second scan interval, concurrency-limited conditional HTTP requests, retry handling, SHA-256 change fingerprints, source status, Detect → Extract → Optimize → Publish pipeline, activity log, persistent state, confidence-based auto-publish and review queue.
