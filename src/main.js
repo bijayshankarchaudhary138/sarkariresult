@@ -368,6 +368,7 @@ let searchTerm = '';
 let countdown = 42;
 let publisherRunning = false;
 let remotePublisherState = null;
+let remoteSocialState = null;
 let remoteScanBusy = false;
 let directoryFilter = 'all';
 let calendarCursor = { year: 2026, month: 8 };
@@ -749,6 +750,9 @@ function setArticleSeo(item, slug) {
   descriptionMeta?.setAttribute('content', description);
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+  const socialImage = document.querySelector('meta[property="og:image"]') || document.head.appendChild(Object.assign(document.createElement('meta'), { property: 'og:image' }));
+  socialImage.setAttribute('content', `${window.location.origin}/media/social/${encodeURIComponent(`${slug}-article.svg`)}`);
+  document.querySelector('meta[name="twitter:card"]')?.setAttribute('content', 'summary_large_image');
   document.querySelector('meta[name="robots"]')?.setAttribute('content', item.sourceArticle?.status === 'draft' ? 'noindex,nofollow' : 'index,follow,max-image-preview:large');
   let canonical = document.querySelector('link[rel="canonical"]');
   if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
@@ -778,6 +782,8 @@ function restoreHomeSeo() {
   document.querySelector('meta[name="description"]')?.setAttribute('content', 'नौकरीसेतु पर सरकारी नौकरी, रिजल्ट, एडमिट कार्ड, आंसर की और ऑनलाइन फॉर्म की verified जानकारी — official links के साथ।');
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', 'नौकरीसेतु — हर सरकारी अवसर, एक भरोसेमंद जगह');
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', 'सरकारी नौकरी और परीक्षा अपडेट, official source से सीधे आपके लिए।');
+  document.querySelector('meta[property="og:image"]')?.remove();
+  document.querySelector('meta[name="twitter:card"]')?.remove();
   document.querySelector('meta[name="robots"]')?.setAttribute('content', 'index,follow,max-image-preview:large');
   document.querySelector('#dynamic-article-schema')?.remove();
   document.querySelector('link[rel="canonical"]')?.remove();
@@ -938,6 +944,7 @@ async function runRemoteScan() {
     const response = await fetch('/api/publisher/scan?force=1', { method: 'POST' });
     if (!response.ok) throw new Error('Scan failed');
     applyPublisherState(await response.json());
+    refreshSocialState();
     showToast('Allowlisted official sources scan complete ✓');
   } catch {
     showToast('Source scan API preview mode में उपलब्ध नहीं है');
@@ -961,15 +968,35 @@ function openInfo(type) {
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
 }
 
+function applySocialState(state) {
+  remoteSocialState = state;
+  const configured = state.platforms?.filter(platform => platform.configured).length || 0;
+  const queued = state.platforms?.reduce((sum, platform) => sum + platform.queued, 0) || 0;
+  const summary = document.querySelector('#publisher-social-summary');
+  if (summary) summary.textContent = `${configured}/3 social accounts connected • ${queued} queued • cap ${state.dailyCap}/day`;
+}
+
+async function refreshSocialState() {
+  try {
+    const response = await fetch('/api/social/state', { headers: { accept: 'application/json' } });
+    if (!response.ok) throw new Error('Social API unavailable');
+    applySocialState(await response.json());
+  } catch {
+    const summary = document.querySelector('#publisher-social-summary');
+    if (summary) summary.textContent = 'Social queue API unavailable';
+  }
+}
+
 function openPublisher() {
   const modal = document.querySelector('#publisher-modal');
   modal.innerHTML = `
-    <div class="publisher-shell"><div class="publisher-header"><div><div class="publisher-overline"><span class="live-ring"></span> INTERNAL WORKSPACE <span>•</span> PREVIEW API</div><h2>Auto Publisher <em>Console</em></h2><p>Official notice से publish-ready article तक का live workflow.</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="publisher-body"><div class="publisher-main"><div class="console-toolbar"><div><span class="console-title">Source monitor</span><span class="console-subtitle" id="publisher-last-scan">Last scan loading • interval 60 sec</span></div><span class="monitoring-pill" id="publisher-monitoring"><i></i> Monitoring sources</span></div><div class="pipeline-strip"><div class="pipeline-step active"><i>01</i><b>Detect</b><small>official notice</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>02</i><b>Extract</b><small>facts + dates</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>03</i><b>Optimize</b><small>SEO + schema</small></div><span>${icon('arrow')}</span><div class="pipeline-step ready"><i>04</i><b>Publish</b><small>CMS + alert</small></div></div><div class="source-monitor-card"><div class="monitor-head"><span class="monitor-icon">${icon('pulse')}</span><div><b>Official portals</b><small>Allowlisted pages + conditional HTTP signals</small></div><span class="monitor-live" id="publisher-live-state">LIVE</span></div><div class="source-progress"><span class="progress-fill"></span></div><div class="source-meta"><span id="publisher-online-summary">${icon('check')} Source status loading</span><span id="publisher-high-priority">${icon('check')} High-priority sources</span><span id="publisher-draft-summary">${icon('check')} Draft queue ready</span><span class="next-scan">Next scan in <b id="publisher-countdown">${countdown}s</b></span></div><div class="source-registry" id="source-registry"></div></div><div class="console-title-row"><span class="console-title">Recent activity</span><button class="refresh-console" data-action="scan-now">${icon('pulse')} Scan now</button></div><div class="activity-list" id="activity-list"><div class="activity-row"><span class="activity-dot green"></span><div><b>BPSC TRE 4.0 notice detected</b><small>Facts extracted • 8 fields verified</small></div><time>2 min</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot blue"></span><div><b>UPSC CDS II Result</b><small>Article draft generated • SEO check passed</small></div><time>1 hr</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot orange"></span><div><b>SSC CGL update</b><small>Awaiting final source confirmation</small></div><time>1 hr</time><span class="activity-state review">Review</span></div></div></div><aside class="publisher-aside"><div class="publish-score"><div class="score-ring"><strong>92</strong><small>/100</small></div><b>Content health</b><span>SEO & source checks passed</span><div class="score-bars"><i style="width:96%"></i><i style="width:88%"></i><i style="width:93%"></i></div><small class="score-labels">Source <span>Structure</span> Links</small></div><div class="publish-settings"><span class="console-title">Publishing rules</span><label><span>Auto-publish after source verification</span><input type="checkbox" checked><i></i></label><label><span>Add FAQ + JSON-LD</span><input type="checkbox" checked><i></i></label><label><span>Send candidate alert</span><input type="checkbox" checked><i></i></label><button class="test-button" data-action="test-publish">Publish selected draft ${icon('arrow')}</button></div></aside></div><div class="publisher-footer"><span>${icon('info')} Production setup में RSS/webhook credentials और CMS API जोड़ें।</span><span class="publisher-footer-links">Docs <i></i> Integrations</span></div></div>`;
+    <div class="publisher-shell"><div class="publisher-header"><div><div class="publisher-overline"><span class="live-ring"></span> INTERNAL WORKSPACE <span>•</span> PREVIEW API</div><h2>Auto Publisher <em>Console</em></h2><p>Official notice से publish-ready article तक का live workflow.</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="publisher-body"><div class="publisher-main"><div class="console-toolbar"><div><span class="console-title">Source monitor</span><span class="console-subtitle" id="publisher-last-scan">Last scan loading • interval 60 sec</span></div><span class="monitoring-pill" id="publisher-monitoring"><i></i> Monitoring sources</span></div><div class="pipeline-strip"><div class="pipeline-step active"><i>01</i><b>Detect</b><small>official notice</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>02</i><b>Extract</b><small>facts + dates</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>03</i><b>Optimize</b><small>SEO + schema</small></div><span>${icon('arrow')}</span><div class="pipeline-step ready"><i>04</i><b>Publish</b><small>CMS + alert</small></div></div><div class="source-monitor-card"><div class="monitor-head"><span class="monitor-icon">${icon('pulse')}</span><div><b>Official portals</b><small>Allowlisted pages + conditional HTTP signals</small></div><span class="monitor-live" id="publisher-live-state">LIVE</span></div><div class="source-progress"><span class="progress-fill"></span></div><div class="source-meta"><span id="publisher-online-summary">${icon('check')} Source status loading</span><span id="publisher-high-priority">${icon('check')} High-priority sources</span><span id="publisher-draft-summary">${icon('check')} Draft queue ready</span><span class="next-scan">Next scan in <b id="publisher-countdown">${countdown}s</b></span></div><div class="source-registry" id="source-registry"></div></div><div class="console-title-row"><span class="console-title">Recent activity</span><button class="refresh-console" data-action="scan-now">${icon('pulse')} Scan now</button></div><div class="activity-list" id="activity-list"><div class="activity-row"><span class="activity-dot green"></span><div><b>BPSC TRE 4.0 notice detected</b><small>Facts extracted • 8 fields verified</small></div><time>2 min</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot blue"></span><div><b>UPSC CDS II Result</b><small>Article draft generated • SEO check passed</small></div><time>1 hr</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot orange"></span><div><b>SSC CGL update</b><small>Awaiting final source confirmation</small></div><time>1 hr</time><span class="activity-state review">Review</span></div></div></div><aside class="publisher-aside"><div class="publish-score"><div class="score-ring"><strong>92</strong><small>/100</small></div><b>Content health</b><span>SEO & source checks passed</span><div class="score-bars"><i style="width:96%"></i><i style="width:88%"></i><i style="width:93%"></i></div><small class="score-labels">Source <span>Structure</span> Links</small></div><div class="publish-settings"><span class="console-title">Publishing rules</span><label><span>Auto-publish after source verification</span><input type="checkbox" checked><i></i></label><label><span>Add FAQ + JSON-LD</span><input type="checkbox" checked><i></i></label><label><span>Send candidate alert</span><input type="checkbox" checked><i></i></label><button class="test-button" data-action="test-publish">Publish selected draft ${icon('arrow')}</button></div></aside></div><div class="publisher-footer"><span id="publisher-social-summary">${icon('info')} Social queue loading • Facebook, Instagram, YouTube</span><span class="publisher-footer-links">Official API setup <i></i> Docs</span></div></div>`;
   openModal('publisher-modal');
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
   modal.querySelector('[data-action="test-publish"]').addEventListener('click', runPublishDemo);
   modal.querySelector('[data-action="scan-now"]').addEventListener('click', runRemoteScan);
   refreshPublisherState();
+  refreshSocialState();
 }
 
 async function runPublishDemo() {
@@ -1088,5 +1115,6 @@ function tick() {
 
 render();
 refreshPublisherState();
+refreshSocialState();
 handleArticleRoute();
 setInterval(tick, 1000);

@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import sources from './publisher-sources.json' with { type: 'json' };
+import { enqueueArticleSocial, ensureDailySyllabus } from './social-distribution.mjs';
 
 const SCAN_INTERVAL_MS = 60_000;
 const FETCH_TIMEOUT_MS = 8_000;
@@ -460,13 +461,18 @@ export async function scanSources({ force = false } = {}) {
             article.status = 'published';
             article.publishedAt = result.checkedAt;
             article.updatedAt = result.checkedAt;
-            addActivity({ type: 'article_published', articleId: article.id, title: article.title, detail: 'Auto-published after source, link and date checks', status: 'published' });
+            enqueueArticleSocial(article);
+            ensureDailySyllabus(article);
+            addActivity({ type: 'article_published', articleId: article.id, title: article.title, detail: 'Auto-published after source, link and date checks; social queue created', status: 'published' });
           } else {
             newDrafts += 1;
           }
         }
       }
     });
+    const publishedArticles = state.articles.filter(article => article.status === 'published');
+    const dailySyllabusSource = publishedArticles.length ? publishedArticles[Math.floor(Date.now() / 86_400_000) % publishedArticles.length] : null;
+    if (dailySyllabusSource) ensureDailySyllabus(dailySyllabusSource);
     const complianceNote = deferredCount ? `; ${deferredCount} source(s) deferred by polling policy` : '';
     addActivity({ type: 'scan_finished', title: `Scan #${state.scanNumber} finished`, detail: changedCount ? `${newDrafts} article draft(s) queued for verification${complianceNote}` : `No new official notice fingerprint detected${complianceNote}`, status: changedCount ? 'drafts' : 'clean' });
     state.lastScanFinishedAt = now();
@@ -483,7 +489,9 @@ export function publishArticle(articleId) {
   article.status = 'published';
   article.publishedAt = now();
   article.updatedAt = article.publishedAt;
-  addActivity({ type: 'article_published', articleId: article.id, title: article.title, detail: `Published from ${article.officialDomain}`, status: 'published' });
+  enqueueArticleSocial(article);
+  ensureDailySyllabus(article);
+  addActivity({ type: 'article_published', articleId: article.id, title: article.title, detail: `Published from ${article.officialDomain}; social queue created`, status: 'published' });
   persistState();
   return article;
 }

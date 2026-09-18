@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { publishArticle, getArticle, getState, scanSources, startMonitor } from './publisher-engine.mjs';
+import { getSocialState, processSocialQueue, startSocialMonitor } from './social-distribution.mjs';
 
 function json(res, payload, status = 200) {
   res.statusCode = status;
@@ -38,8 +39,15 @@ function publisherApi() {
     name: 'naukrisetu-publisher-api',
     configureServer(server) {
       startMonitor();
+      startSocialMonitor();
       server.middlewares.use((req, res, next) => {
         if ((req.url || '').split('?')[0] === '/sitemap.xml') return xml(res, sitemapXml());
+        next();
+      });
+      server.middlewares.use('/api/social', async (req, res, next) => {
+        const url = new URL(req.url || '/', 'http://localhost');
+        if (req.method === 'GET' && url.pathname === '/state') return json(res, getSocialState());
+        if (req.method === 'POST' && url.pathname === '/process') return json(res, await processSocialQueue({ force: url.searchParams.get('force') === '1' }));
         next();
       });
       server.middlewares.use('/api/publisher', async (req, res, next) => {
@@ -69,8 +77,15 @@ function publisherApi() {
     },
     configurePreviewServer(server) {
       startMonitor();
+      startSocialMonitor();
       server.middlewares.use((req, res, next) => {
         if ((req.url || '').split('?')[0] === '/sitemap.xml') return xml(res, sitemapXml());
+        next();
+      });
+      server.middlewares.use('/api/social', async (req, res, next) => {
+        const url = new URL(req.url || '/', 'http://localhost');
+        if (req.method === 'GET' && url.pathname === '/state') return json(res, getSocialState());
+        if (req.method === 'POST' && url.pathname === '/process') return json(res, await processSocialQueue({ force: url.searchParams.get('force') === '1' }));
         next();
       });
       server.middlewares.use('/api/publisher', async (req, res, next) => {

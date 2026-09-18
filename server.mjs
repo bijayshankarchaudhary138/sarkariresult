@@ -4,6 +4,7 @@ import { access, readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getArticle, getState, publishArticle, scanSources, startMonitor } from './publisher-engine.mjs';
+import { getSocialAssetPath, getSocialState, processSocialQueue, startSocialMonitor } from './social-distribution.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const dist = join(root, 'dist');
@@ -71,10 +72,11 @@ async function serveIndex(req, res) {
     const description = (article?.seo?.description || 'सरकारी नौकरी, रिजल्ट, एडमिट कार्ड और official notification की verified जानकारी।').slice(0, 155);
     const schema = article ? `<script id="server-article-schema" type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: article.title, description, dateModified: article.updatedAt || article.createdAt, author: { '@type': 'Organization', name: 'नौकरीसेतु Editorial Desk' }, breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'होम', item: publicSiteUrl }, { '@type': 'ListItem', position: 2, name: article.category || 'Updates', item: `${publicSiteUrl}/#directory` }, { '@type': 'ListItem', position: 3, name: article.title, item: `${publicSiteUrl}${pathname}` }] }, mainEntityOfPage: `${publicSiteUrl}${pathname}` })}</script>` : '';
     const visibilityMeta = article?.status === 'published' ? '' : '<meta name="robots" content="noindex,nofollow" />';
+    const socialImage = article ? `${publicSiteUrl}/media/social/${encodeURIComponent(`${article.slug}-article.svg`)}` : '';
     html = html
       .replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`)
       .replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${description.replace(/"/g, '&quot;')}" />`)
-      .replace('</head>', `${visibilityMeta}<link rel="canonical" href="${publicSiteUrl}${pathname}" />${schema}</head>`);
+      .replace('</head>', `${visibilityMeta}<meta property="og:image" content="${socialImage}" /><meta name="twitter:card" content="summary_large_image" /><link rel="canonical" href="${publicSiteUrl}${pathname}" />${schema}</head>`);
   }
   send(res, 200, html, 'text/html; charset=utf-8');
 }
@@ -98,6 +100,24 @@ async function serveStatic(req, res) {
 
 async function handle(req, res) {
   const url = new URL(req.url, publicSiteUrl);
+  if (url.pathname.startsWith('/media/social/') && req.method === 'GET') {
+    const assetPath = getSocialAssetPath(decodeURIComponent(url.pathname.slice('/media/social/'.length)));
+    if (!assetPath) return send(res, 400, 'Invalid social asset');
+    try {
+      await access(assetPath);
+      res.statusCode = 200;
+      res.setHeader('content-type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('cache-control', 'public, max-age=3600');
+      return createReadStream(assetPath).pipe(res);
+    } catch {
+      return send(res, 404, 'Social asset not found');
+    }
+  }
+  if (url.pathname === '/api/social/state' && req.method === 'GET') return sendJson(res, 200, getSocialState());
+  if (url.pathname === '/api/social/process' && req.method === 'POST') {
+    if (!isAdmin(req)) return sendJson(res, 401, { error: 'Publisher admin authorization required' });
+    return sendJson(res, 200, await processSocialQueue({ force: url.searchParams.get('force') === '1' }));
+  }
   if (url.pathname === '/api/publisher/state' && req.method === 'GET') return sendJson(res, 200, getState());
   if (url.pathname === '/api/publisher/scan' && req.method === 'POST') {
     if (!isAdmin(req)) return sendJson(res, 401, { error: 'Publisher admin authorization required' });
@@ -120,6 +140,7 @@ async function handle(req, res) {
 }
 
 startMonitor();
+startSocialMonitor();
 const server = http.createServer((req, res) => {
   handle(req, res).catch(error => sendJson(res, 500, { error: 'Internal server error', detail: error.message }));
 });
