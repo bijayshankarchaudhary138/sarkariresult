@@ -11,6 +11,7 @@ const SOCIAL_STATE_FILE = join(DATA_DIR, 'social-state.json');
 const SOCIAL_ASSET_DIR = join(DATA_DIR, 'social-assets');
 const SOCIAL_INTERVAL_MS = 60_000;
 const SOCIAL_DAILY_CAP = Math.min(10, Math.max(5, Number(process.env.SOCIAL_DAILY_CAP || 10)));
+const SOCIAL_SYLLABUS_DAILY_CAP = 5;
 const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v25.0';
 const PUBLIC_SITE_URL = (process.env.PUBLIC_SITE_URL || 'http://localhost:4173').replace(/\/$/, '');
 
@@ -25,6 +26,7 @@ let hydrated = false;
 let hydration = Promise.resolve();
 let writeChain = Promise.resolve();
 let intervalHandle;
+const pendingSocialKeys = new Set();
 
 function now() {
   return new Date().toISOString();
@@ -193,20 +195,28 @@ function enqueuePlatformItems(article, type, asset) {
 
 export function enqueueArticleSocial(article) {
   if (!article?.id || !article?.slug) return;
+  const key = `${article.id}:article`;
+  if (pendingSocialKeys.has(key) || state.queue.some(item => item.sourceKey === key)) return;
+  pendingSocialKeys.add(key);
   ensureAsset(article, 'article').then(asset => {
     enqueuePlatformItems(article, 'article', asset);
     persist();
-  }).catch(error => state.history.unshift({ id: crypto.randomUUID(), type: 'asset_error', message: error.message, createdAt: now() }));
+  }).catch(error => state.history.unshift({ id: crypto.randomUUID(), type: 'asset_error', message: error.message, createdAt: now() })).finally(() => pendingSocialKeys.delete(key));
 }
 
 export function ensureDailySyllabus(article) {
   if (!article?.id || !article?.slug) return;
   const day = todayKey();
-  if (state.queue.some(item => item.type === 'syllabus' && item.scheduledFor?.startsWith(day))) return;
+  const key = `${article.id}:syllabus`;
+  const sameDaySyllabus = state.queue.filter(item => item.type === 'syllabus' && item.scheduledFor?.startsWith(day));
+  const sameDaySyllabusArticles = new Set(sameDaySyllabus.map(item => item.articleId));
+  const pendingSyllabus = [...pendingSocialKeys].filter(pendingKey => pendingKey.endsWith(':syllabus')).length;
+  if (pendingSocialKeys.has(key) || sameDaySyllabusArticles.size + pendingSyllabus >= SOCIAL_SYLLABUS_DAILY_CAP || sameDaySyllabusArticles.has(article.id) || state.queue.some(item => item.sourceKey === key)) return;
+  pendingSocialKeys.add(key);
   ensureAsset(article, 'syllabus').then(asset => {
     enqueuePlatformItems(article, 'syllabus', asset);
     persist();
-  }).catch(() => {});
+  }).catch(() => {}).finally(() => pendingSocialKeys.delete(key));
 }
 
 function credentials(platform) {
@@ -299,6 +309,7 @@ export function getSocialState() {
   return {
     lastRunAt: state.lastRunAt,
     dailyCap: SOCIAL_DAILY_CAP,
+    syllabusDailyCap: SOCIAL_SYLLABUS_DAILY_CAP,
     platforms: platforms().map(platform => ({ platform, configured: credentials(platform), publishedToday: state.queue.filter(item => item.platform === platform && item.status === 'published' && item.publishedAt?.startsWith(day)).length, queued: state.queue.filter(item => item.platform === platform && ['queued', 'awaiting_credentials', 'retry'].includes(item.status)).length })),
     queue: state.queue.slice(-100),
     history: state.history.slice(0, 30)

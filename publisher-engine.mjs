@@ -471,8 +471,11 @@ export async function scanSources({ force = false } = {}) {
       }
     });
     const publishedArticles = state.articles.filter(article => article.status === 'published');
-    const dailySyllabusSource = publishedArticles.length ? publishedArticles[Math.floor(Date.now() / 86_400_000) % publishedArticles.length] : null;
-    if (dailySyllabusSource) ensureDailySyllabus(dailySyllabusSource);
+    const rotationStart = publishedArticles.length ? Math.floor(Date.now() / 86_400_000) % publishedArticles.length : 0;
+    publishedArticles.slice(0, Math.min(5, publishedArticles.length)).forEach((_, index) => {
+      const sourceArticle = publishedArticles[(rotationStart + index) % publishedArticles.length];
+      if (sourceArticle) ensureDailySyllabus(sourceArticle);
+    });
     const complianceNote = deferredCount ? `; ${deferredCount} source(s) deferred by polling policy` : '';
     addActivity({ type: 'scan_finished', title: `Scan #${state.scanNumber} finished`, detail: changedCount ? `${newDrafts} article draft(s) queued for verification${complianceNote}` : `No new official notice fingerprint detected${complianceNote}`, status: changedCount ? 'drafts' : 'clean' });
     state.lastScanFinishedAt = now();

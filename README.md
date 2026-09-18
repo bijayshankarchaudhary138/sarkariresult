@@ -43,7 +43,7 @@ SOCIAL_DAILY_CAP=10
 - Vite middleware API at `/api/publisher/state`, `/api/publisher/scan` and `/api/publisher/publish` for the preview workflow. `publisher-engine.mjs` is the server-side source/publisher boundary.
 - Production `server.mjs` serves the built site, dynamic `/sitemap.xml`, `/robots.txt`, API routes and SEO metadata for `/updates/:slug` article URLs.
 - Dynamic article URL, canonical metadata, Article JSON-LD and shareable per-update paths.
-- Durable social distribution queue: every verified article creates Facebook, Instagram and YouTube jobs, one source-backed syllabus/pattern card per day, branded SVG social assets, per-platform daily cap (5–10), retry/status history and `/api/social/state` monitoring.
+- Durable social distribution queue: every verified article creates Facebook, Instagram and YouTube jobs, up to five rotating source-backed syllabus/pattern cards per day, branded SVG social assets, per-platform daily cap (5–10), retry/status history and `/api/social/state` monitoring.
 - Official Meta publishing adapters use `META_ACCESS_TOKEN`, `META_PAGE_ID` and `META_IG_USER_ID`; YouTube uses a secure `YOUTUBE_RENDERER_URL` hook because a static image cannot be uploaded as a YouTube Short. Social process is admin-protected at `/api/social/process`.
 - Facebook link posts and YouTube descriptions can be clickable; Instagram feed images do not make arbitrary image pixels clickable, so the full URL is printed on the card and included in the caption/profile-link flow.
 - `public/robots.txt` starter file; replace its production domain placeholder before launch.

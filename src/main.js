@@ -973,7 +973,7 @@ function applySocialState(state) {
   const configured = state.platforms?.filter(platform => platform.configured).length || 0;
   const queued = state.platforms?.reduce((sum, platform) => sum + platform.queued, 0) || 0;
   const summary = document.querySelector('#publisher-social-summary');
-  if (summary) summary.textContent = `${configured}/3 social accounts connected • ${queued} queued • cap ${state.dailyCap}/day`;
+  if (summary) summary.textContent = `${configured}/3 social accounts connected • ${queued} queued • cap ${state.dailyCap}/day • ${state.syllabusDailyCap || 5} syllabus cards`;
 }
 
 async function refreshSocialState() {
