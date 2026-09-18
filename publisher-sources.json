@@ -1,12 +1,23 @@
 [
   {
-    "id": "bpsc",
-    "name": "BPSC Bihar",
-    "category": "State PSC",
-    "url": "https://bpsc.bihar.gov.in/",
-    "officialDomain": "bpsc.bihar.gov.in",
+    "id": "upsc",
+    "name": "UPSC",
+    "category": "Central Jobs",
+    "url": "https://upsc.gov.in/",
+    "officialDomain": "upsc.gov.in",
     "enabled": true,
-    "priority": "high"
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "upsc-online",
+    "name": "UPSC Online",
+    "category": "Central Jobs",
+    "url": "https://upsconline.nic.in/",
+    "officialDomain": "upsconline.nic.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
   },
   {
     "id": "ssc",
@@ -15,106 +26,308 @@
     "url": "https://ssc.gov.in/",
     "officialDomain": "ssc.gov.in",
     "enabled": true,
-    "priority": "high"
+    "priority": "high",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "upsc",
-    "name": "Union Public Service Commission",
-    "category": "Central Jobs",
-    "url": "https://upsc.gov.in/",
-    "officialDomain": "upsc.gov.in",
-    "enabled": true,
-    "priority": "high"
-  },
-  {
-    "id": "rrb",
-    "name": "Railway Recruitment Board",
+    "id": "rrb-cdg",
+    "name": "RRB Chandigarh",
     "category": "Railways",
     "url": "https://www.rrbcdg.gov.in/",
-    "officialDomain": "rrbcdg.gov.in",
+    "officialDomain": "www.rrbcdg.gov.in",
     "enabled": true,
-    "priority": "high"
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-ahmedabad",
+    "name": "RRB Ahmedabad",
+    "category": "Railways",
+    "url": "https://www.rrbahmedabad.gov.in/",
+    "officialDomain": "www.rrbahmedabad.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-ajmer",
+    "name": "RRB Ajmer",
+    "category": "Railways",
+    "url": "https://rrbajmer.gov.in/",
+    "officialDomain": "rrbajmer.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-allahabad",
+    "name": "RRB Prayagraj",
+    "category": "Railways",
+    "url": "https://www.rrbald.gov.in/",
+    "officialDomain": "www.rrbald.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-bangalore",
+    "name": "RRB Bengaluru",
+    "category": "Railways",
+    "url": "https://rrbbnc.gov.in/",
+    "officialDomain": "rrbbnc.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-bhopal",
+    "name": "RRB Bhopal",
+    "category": "Railways",
+    "url": "https://rrbbhopal.gov.in/",
+    "officialDomain": "rrbbhopal.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-bhubaneswar",
+    "name": "RRB Bhubaneswar",
+    "category": "Railways",
+    "url": "https://www.rrbbbs.gov.in/",
+    "officialDomain": "www.rrbbbs.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-bilaspur",
+    "name": "RRB Bilaspur",
+    "category": "Railways",
+    "url": "https://rrbbilaspur.gov.in/",
+    "officialDomain": "rrbbilaspur.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-chennai",
+    "name": "RRB Chennai",
+    "category": "Railways",
+    "url": "https://www.rrbchennai.gov.in/",
+    "officialDomain": "www.rrbchennai.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-gorakhpur",
+    "name": "RRB Gorakhpur",
+    "category": "Railways",
+    "url": "https://www.rrbgkp.gov.in/",
+    "officialDomain": "www.rrbgkp.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-guwahati",
+    "name": "RRB Guwahati",
+    "category": "Railways",
+    "url": "https://www.rrbguwahati.gov.in/",
+    "officialDomain": "www.rrbguwahati.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-jammu",
+    "name": "RRB Jammu",
+    "category": "Railways",
+    "url": "https://www.rrbjammu.nic.in/",
+    "officialDomain": "www.rrbjammu.nic.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-kolkata",
+    "name": "RRB Kolkata",
+    "category": "Railways",
+    "url": "https://www.rrbkolkata.gov.in/",
+    "officialDomain": "www.rrbkolkata.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-malda",
+    "name": "RRB Malda",
+    "category": "Railways",
+    "url": "https://www.rrbmalda.gov.in/",
+    "officialDomain": "www.rrbmalda.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-mumbai",
+    "name": "RRB Mumbai",
+    "category": "Railways",
+    "url": "https://www.rrbmumbai.gov.in/",
+    "officialDomain": "www.rrbmumbai.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-muzaffarpur",
+    "name": "RRB Muzaffarpur",
+    "category": "Railways",
+    "url": "https://www.rrbmuzaffarpur.gov.in/",
+    "officialDomain": "www.rrbmuzaffarpur.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-patna",
+    "name": "RRB Patna",
+    "category": "Railways",
+    "url": "https://www.rrbpatna.gov.in/",
+    "officialDomain": "www.rrbpatna.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-ranchi",
+    "name": "RRB Ranchi",
+    "category": "Railways",
+    "url": "https://www.rrbranchi.gov.in/",
+    "officialDomain": "www.rrbranchi.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-secunderabad",
+    "name": "RRB Secunderabad",
+    "category": "Railways",
+    "url": "https://rrbsecunderabad.gov.in/",
+    "officialDomain": "rrbsecunderabad.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-siliguri",
+    "name": "RRB Siliguri",
+    "category": "Railways",
+    "url": "https://www.rrbsiliguri.gov.in/",
+    "officialDomain": "www.rrbsiliguri.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rrb-thiruvananthapuram",
+    "name": "RRB Thiruvananthapuram",
+    "category": "Railways",
+    "url": "https://www.rrbthiruvananthapuram.gov.in/",
+    "officialDomain": "www.rrbthiruvananthapuram.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   },
   {
     "id": "ibps",
-    "name": "Institute of Banking Personnel Selection",
+    "name": "IBPS",
     "category": "Banking",
     "url": "https://www.ibps.in/",
-    "officialDomain": "ibps.in",
+    "officialDomain": "www.ibps.in",
     "enabled": true,
-    "priority": "high"
+    "priority": "high",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "nta",
-    "name": "National Testing Agency",
-    "category": "Entrance & Education",
-    "url": "https://exams.nta.ac.in/",
-    "officialDomain": "exams.nta.ac.in",
+    "id": "sbi-careers",
+    "name": "SBI Careers",
+    "category": "Banking",
+    "url": "https://sbi.bank.in/web/careers",
+    "officialDomain": "sbi.bank.in",
     "enabled": true,
-    "priority": "high"
+    "priority": "high",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "csbc",
-    "name": "Central Selection Board of Constable",
-    "category": "Police",
-    "url": "https://csbc.bihar.gov.in/",
-    "officialDomain": "csbc.bihar.gov.in",
+    "id": "rbi",
+    "name": "RBI Opportunities",
+    "category": "Banking",
+    "url": "https://opportunities.rbi.org.in/",
+    "officialDomain": "opportunities.rbi.org.in",
     "enabled": true,
-    "priority": "high"
+    "priority": "high",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "dsssb",
-    "name": "DSSSB Delhi",
-    "category": "State Jobs",
-    "url": "https://dsssb.delhi.gov.in/",
-    "officialDomain": "dsssb.delhi.gov.in",
+    "id": "nabard",
+    "name": "NABARD Careers",
+    "category": "Banking",
+    "url": "https://www.nabard.org/careers-notices1.aspx?cid=664&id=26",
+    "officialDomain": "www.nabard.org",
     "enabled": true,
-    "priority": "high"
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "mppesb",
-    "name": "MP Employees Selection Board",
-    "category": "State Jobs",
-    "url": "https://esb.mp.gov.in/e_default.html",
-    "officialDomain": "esb.mp.gov.in",
+    "id": "sebi",
+    "name": "SEBI Careers",
+    "category": "Banking",
+    "url": "https://www.sebi.gov.in/",
+    "officialDomain": "www.sebi.gov.in",
     "enabled": true,
-    "priority": "normal"
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "rpsc",
-    "name": "Rajasthan Public Service Commission",
-    "category": "State PSC",
-    "url": "https://rpsc.rajasthan.gov.in/",
-    "officialDomain": "rpsc.rajasthan.gov.in",
+    "id": "lic",
+    "name": "LIC Careers",
+    "category": "Banking",
+    "url": "https://licindia.in/careers",
+    "officialDomain": "licindia.in",
     "enabled": true,
-    "priority": "normal"
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "navy",
-    "name": "Join Indian Navy",
-    "category": "Defence",
-    "url": "https://www.joinindiannavy.gov.in/",
-    "officialDomain": "joinindiannavy.gov.in",
+    "id": "niacl",
+    "name": "New India Assurance Recruitment",
+    "category": "Insurance",
+    "url": "https://www.newindia.co.in/recruitment/list",
+    "officialDomain": "www.newindia.co.in",
     "enabled": true,
-    "priority": "normal"
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "airforce",
-    "name": "Indian Air Force",
-    "category": "Defence",
-    "url": "https://indianairforce.nic.in/",
-    "officialDomain": "indianairforce.nic.in",
+    "id": "india-post-gds",
+    "name": "India Post GDS",
+    "category": "Postal Jobs",
+    "url": "https://indiapostgdsonline.gov.in/",
+    "officialDomain": "indiapostgdsonline.gov.in",
     "enabled": true,
-    "priority": "normal"
+    "priority": "high",
+    "pollIntervalSeconds": 60
   },
   {
-    "id": "isro",
-    "name": "Indian Space Research Organisation",
-    "category": "PSU & Science",
-    "url": "https://www.isro.gov.in/",
-    "officialDomain": "isro.gov.in",
+    "id": "india-post",
+    "name": "India Post",
+    "category": "Postal Jobs",
+    "url": "https://www.indiapost.gov.in/",
+    "officialDomain": "www.indiapost.gov.in",
     "enabled": true,
-    "priority": "normal"
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   },
   {
     "id": "employment-news",
@@ -123,6 +336,797 @@
     "url": "https://employmentnews.gov.in/",
     "officialDomain": "employmentnews.gov.in",
     "enabled": true,
-    "priority": "normal"
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ncs",
+    "name": "National Career Service",
+    "category": "Central Jobs",
+    "url": "https://www.ncs.gov.in/",
+    "officialDomain": "www.ncs.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "drdo",
+    "name": "DRDO Careers",
+    "category": "Defence & PSU",
+    "url": "https://drdo.gov.in/careers",
+    "officialDomain": "drdo.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "isro",
+    "name": "ISRO Careers",
+    "category": "Defence & PSU",
+    "url": "https://www.isro.gov.in/",
+    "officialDomain": "www.isro.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "barc",
+    "name": "BARC Recruitment",
+    "category": "Defence & PSU",
+    "url": "https://recruit.barc.gov.in/",
+    "officialDomain": "recruit.barc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "npcil",
+    "name": "NPCIL Careers",
+    "category": "Defence & PSU",
+    "url": "https://www.npcilcareers.co.in/",
+    "officialDomain": "www.npcilcareers.co.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bel",
+    "name": "BEL Careers",
+    "category": "Defence & PSU",
+    "url": "https://bel-india.in/careers/",
+    "officialDomain": "bel-india.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "hal",
+    "name": "HAL Careers",
+    "category": "Defence & PSU",
+    "url": "https://hal-india.co.in/career",
+    "officialDomain": "hal-india.co.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ongc",
+    "name": "ONGC Careers",
+    "category": "Defence & PSU",
+    "url": "https://ongcindia.com/web/eng/career",
+    "officialDomain": "ongcindia.com",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "gail",
+    "name": "GAIL Careers",
+    "category": "Defence & PSU",
+    "url": "https://www.gailonline.com/home.html",
+    "officialDomain": "www.gailonline.com",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "iocl",
+    "name": "IOCL Careers",
+    "category": "Defence & PSU",
+    "url": "https://iocl.com/latest-job-opening",
+    "officialDomain": "iocl.com",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "coal-india",
+    "name": "Coal India Careers",
+    "category": "Defence & PSU",
+    "url": "https://www.coalindia.in/career-cil/",
+    "officialDomain": "www.coalindia.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "aiims",
+    "name": "AIIMS Exams",
+    "category": "Medical Jobs",
+    "url": "https://www.aiimsexams.ac.in/",
+    "officialDomain": "www.aiimsexams.ac.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "nta",
+    "name": "National Testing Agency",
+    "category": "Education",
+    "url": "https://exams.nta.ac.in/",
+    "officialDomain": "exams.nta.ac.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ctet",
+    "name": "CTET",
+    "category": "Education",
+    "url": "https://ctet.nic.in/",
+    "officialDomain": "ctet.nic.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ugc-net",
+    "name": "UGC NET",
+    "category": "Education",
+    "url": "https://ugcnet.nta.nic.in/",
+    "officialDomain": "ugcnet.nta.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "indian-army",
+    "name": "Join Indian Army",
+    "category": "Defence",
+    "url": "https://joinindianarmy.nic.in/",
+    "officialDomain": "joinindianarmy.nic.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "navy",
+    "name": "Join Indian Navy",
+    "category": "Defence",
+    "url": "https://www.joinindiannavy.gov.in/",
+    "officialDomain": "www.joinindiannavy.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "airforce",
+    "name": "Indian Air Force",
+    "category": "Defence",
+    "url": "https://agnipathvayu.cdac.in/",
+    "officialDomain": "agnipathvayu.cdac.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "coast-guard",
+    "name": "Indian Coast Guard",
+    "category": "Defence",
+    "url": "https://joinindiancoastguard.cdac.in/",
+    "officialDomain": "joinindiancoastguard.cdac.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bsf",
+    "name": "BSF Recruitment",
+    "category": "Defence",
+    "url": "https://rectt.bsf.gov.in/",
+    "officialDomain": "rectt.bsf.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "crpf",
+    "name": "CRPF Recruitment",
+    "category": "Defence",
+    "url": "https://rect.crpf.gov.in/",
+    "officialDomain": "rect.crpf.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "cisf",
+    "name": "CISF Recruitment",
+    "category": "Defence",
+    "url": "https://cisfrectt.cisf.gov.in/",
+    "officialDomain": "cisfrectt.cisf.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "itbp",
+    "name": "ITBP Recruitment",
+    "category": "Defence",
+    "url": "https://recruitment.itbpolice.nic.in/",
+    "officialDomain": "recruitment.itbpolice.nic.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ssb",
+    "name": "SSB Recruitment",
+    "category": "Defence",
+    "url": "https://recruitment.ssb.gov.in/",
+    "officialDomain": "recruitment.ssb.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "assam-rifles",
+    "name": "Assam Rifles",
+    "category": "Defence",
+    "url": "https://www.assamrifles.gov.in/",
+    "officialDomain": "www.assamrifles.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bpsc",
+    "name": "BPSC Bihar",
+    "category": "State PSC",
+    "url": "https://bpsc.bihar.gov.in/",
+    "officialDomain": "bpsc.bihar.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bpssc",
+    "name": "BPSSC Bihar",
+    "category": "Police",
+    "url": "https://bpssc.bihar.gov.in/",
+    "officialDomain": "bpssc.bihar.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "csbc",
+    "name": "CSBC Bihar",
+    "category": "Police",
+    "url": "https://csbc.bihar.gov.in/",
+    "officialDomain": "csbc.bihar.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "uppsc",
+    "name": "UPPSC",
+    "category": "State PSC",
+    "url": "https://uppsc.up.nic.in/",
+    "officialDomain": "uppsc.up.nic.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "upsssc",
+    "name": "UPSSSC",
+    "category": "State Jobs",
+    "url": "https://upsssc.gov.in/",
+    "officialDomain": "upsssc.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "upessc",
+    "name": "UP Education Service Selection Commission",
+    "category": "Education",
+    "url": "https://upessc.up.gov.in/",
+    "officialDomain": "upessc.up.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "hpsc",
+    "name": "HPSC Haryana",
+    "category": "State PSC",
+    "url": "https://hpsc.gov.in/",
+    "officialDomain": "hpsc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "hssc",
+    "name": "HSSC Haryana",
+    "category": "State Jobs",
+    "url": "https://hssc.gov.in/",
+    "officialDomain": "hssc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rpsc",
+    "name": "RPSC Rajasthan",
+    "category": "State PSC",
+    "url": "https://rpsc.rajasthan.gov.in/",
+    "officialDomain": "rpsc.rajasthan.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "rssb",
+    "name": "RSSB Rajasthan",
+    "category": "State Jobs",
+    "url": "https://rssb.rajasthan.gov.in/",
+    "officialDomain": "rssb.rajasthan.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "mppsc",
+    "name": "MPPSC",
+    "category": "State PSC",
+    "url": "https://mppsc.mp.gov.in/",
+    "officialDomain": "mppsc.mp.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "mppesb",
+    "name": "MP Employees Selection Board",
+    "category": "State Jobs",
+    "url": "https://esb.mp.gov.in/e_default.html",
+    "officialDomain": "esb.mp.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "jpsc",
+    "name": "JPSC Jharkhand",
+    "category": "State PSC",
+    "url": "https://www.jpsc.gov.in/",
+    "officialDomain": "www.jpsc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "jssc",
+    "name": "JSSC Jharkhand",
+    "category": "State Jobs",
+    "url": "https://jssc.nic.in/",
+    "officialDomain": "jssc.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "cgpsc",
+    "name": "CGPSC Chhattisgarh",
+    "category": "State PSC",
+    "url": "https://psc.cg.gov.in/",
+    "officialDomain": "psc.cg.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ukpsc",
+    "name": "UKPSC Uttarakhand",
+    "category": "State PSC",
+    "url": "https://psc.uk.gov.in/",
+    "officialDomain": "psc.uk.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "gpsc",
+    "name": "GPSC Gujarat",
+    "category": "State PSC",
+    "url": "https://gpsc.gujarat.gov.in/",
+    "officialDomain": "gpsc.gujarat.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "mpsc",
+    "name": "MPSC Maharashtra",
+    "category": "State PSC",
+    "url": "https://mpsc.gov.in/",
+    "officialDomain": "mpsc.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "wbpsc",
+    "name": "WBPSC West Bengal",
+    "category": "State PSC",
+    "url": "https://psc.wb.gov.in/",
+    "officialDomain": "psc.wb.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "opsc",
+    "name": "OPSC Odisha",
+    "category": "State PSC",
+    "url": "https://www.opsc.gov.in/",
+    "officialDomain": "www.opsc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "appsc",
+    "name": "APPSC Andhra Pradesh",
+    "category": "State PSC",
+    "url": "https://psc.ap.gov.in/",
+    "officialDomain": "psc.ap.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "tspsc",
+    "name": "TSPSC Telangana",
+    "category": "State PSC",
+    "url": "https://websitenew.tspsc.gov.in/",
+    "officialDomain": "websitenew.tspsc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "kpsc",
+    "name": "KPSC Karnataka",
+    "category": "State PSC",
+    "url": "https://kpsc.kar.nic.in/",
+    "officialDomain": "kpsc.kar.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "tnpsc",
+    "name": "TNPSC Tamil Nadu",
+    "category": "State PSC",
+    "url": "https://www.tnpsc.gov.in/",
+    "officialDomain": "www.tnpsc.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "kerala-psc",
+    "name": "Kerala PSC",
+    "category": "State PSC",
+    "url": "https://www.keralapsc.gov.in/",
+    "officialDomain": "www.keralapsc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "apsc",
+    "name": "APSC Assam",
+    "category": "State PSC",
+    "url": "https://apsc.nic.in/",
+    "officialDomain": "apsc.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "spsc",
+    "name": "Sikkim PSC",
+    "category": "State PSC",
+    "url": "https://spsc.sikkim.gov.in/",
+    "officialDomain": "spsc.sikkim.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "manipur-psc",
+    "name": "Manipur PSC",
+    "category": "State PSC",
+    "url": "https://mpscmanipur.gov.in/",
+    "officialDomain": "mpscmanipur.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "meghalaya-psc",
+    "name": "Meghalaya PSC",
+    "category": "State PSC",
+    "url": "https://mpsc.nic.in/",
+    "officialDomain": "mpsc.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "tripura-psc",
+    "name": "Tripura PSC",
+    "category": "State PSC",
+    "url": "https://tpsc.tripura.gov.in/",
+    "officialDomain": "tpsc.tripura.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "goa-psc",
+    "name": "Goa PSC",
+    "category": "State PSC",
+    "url": "https://gpsc.goa.gov.in/",
+    "officialDomain": "gpsc.goa.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "dsssb",
+    "name": "DSSSB Delhi",
+    "category": "State Jobs",
+    "url": "https://dsssb.delhi.gov.in/",
+    "officialDomain": "dsssb.delhi.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "delhi-police",
+    "name": "Delhi Police Recruitment",
+    "category": "Police",
+    "url": "https://delhipolice.gov.in/recruitment",
+    "officialDomain": "delhipolice.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "nielit",
+    "name": "NIELIT",
+    "category": "Education & IT",
+    "url": "https://www.nielit.gov.in/",
+    "officialDomain": "www.nielit.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "cbse",
+    "name": "CBSE",
+    "category": "Education",
+    "url": "https://www.cbse.gov.in/",
+    "officialDomain": "www.cbse.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "kvs",
+    "name": "Kendriya Vidyalaya Sangathan",
+    "category": "Teaching Jobs",
+    "url": "https://kvsangathan.nic.in/",
+    "officialDomain": "kvsangathan.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "nvs",
+    "name": "Navodaya Vidyalaya Samiti",
+    "category": "Teaching Jobs",
+    "url": "https://navodaya.gov.in/",
+    "officialDomain": "navodaya.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "patna-high-court",
+    "name": "Patna High Court",
+    "category": "Courts",
+    "url": "https://patnahighcourt.gov.in/",
+    "officialDomain": "patnahighcourt.gov.in",
+    "enabled": true,
+    "priority": "high",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "allahabad-high-court",
+    "name": "Allahabad High Court",
+    "category": "Courts",
+    "url": "https://www.allahabadhighcourt.in/",
+    "officialDomain": "www.allahabadhighcourt.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "delhi-high-court",
+    "name": "Delhi High Court",
+    "category": "Courts",
+    "url": "https://delhihighcourt.nic.in/",
+    "officialDomain": "delhihighcourt.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bombay-high-court",
+    "name": "Bombay High Court",
+    "category": "Courts",
+    "url": "https://bombayhighcourt.nic.in/",
+    "officialDomain": "bombayhighcourt.nic.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "calcutta-high-court",
+    "name": "Calcutta High Court",
+    "category": "Courts",
+    "url": "https://www.calcuttahighcourt.gov.in/",
+    "officialDomain": "www.calcuttahighcourt.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "nhm-india",
+    "name": "National Health Mission",
+    "category": "Medical Jobs",
+    "url": "https://nhm.gov.in/",
+    "officialDomain": "nhm.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "nhm-bihar",
+    "name": "NHM Bihar",
+    "category": "Medical Jobs",
+    "url": "https://health.bihar.gov.in/",
+    "officialDomain": "health.bihar.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "aiims-patna",
+    "name": "AIIMS Patna",
+    "category": "Medical Jobs",
+    "url": "https://aiimspatna.edu.in/",
+    "officialDomain": "aiimspatna.edu.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bihar-health",
+    "name": "Bihar Health Department",
+    "category": "Medical Jobs",
+    "url": "https://health.bihar.gov.in/",
+    "officialDomain": "health.bihar.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bihar-beltron",
+    "name": "Bihar BELTRON",
+    "category": "State Jobs",
+    "url": "https://bsedc.bihar.gov.in/",
+    "officialDomain": "bsedc.bihar.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bihar-board",
+    "name": "Bihar School Examination Board",
+    "category": "Education",
+    "url": "https://biharboardonline.bihar.gov.in/",
+    "officialDomain": "biharboardonline.bihar.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "bcece",
+    "name": "BCECE Board Bihar",
+    "category": "Education",
+    "url": "https://bceceboard.bihar.gov.in/",
+    "officialDomain": "bceceboard.bihar.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "patna-university",
+    "name": "Patna University",
+    "category": "Education",
+    "url": "https://pup.ac.in/",
+    "officialDomain": "pup.ac.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "iim-cat",
+    "name": "IIM CAT",
+    "category": "Education",
+    "url": "https://iimcat.ac.in/",
+    "officialDomain": "iimcat.ac.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "gate",
+    "name": "GATE",
+    "category": "Education",
+    "url": "https://gate2026.iitg.ac.in/",
+    "officialDomain": "gate2026.iitg.ac.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ugc",
+    "name": "UGC India",
+    "category": "Education",
+    "url": "https://www.ugc.gov.in/",
+    "officialDomain": "www.ugc.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
+  },
+  {
+    "id": "ncs-employment",
+    "name": "Employment Exchange Services",
+    "category": "Central Jobs",
+    "url": "https://www.ncs.gov.in/",
+    "officialDomain": "www.ncs.gov.in",
+    "enabled": true,
+    "priority": "normal",
+    "pollIntervalSeconds": 60
   }
 ]

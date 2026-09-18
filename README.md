@@ -13,7 +13,9 @@ Open the Vite preview shown by Arena. Production server:
 
 ```bash
 npm run build
-PUBLIC_SITE_URL=https://your-domain.example npm start
+PUBLIC_SITE_URL=https://your-domain.example \
+PUBLISHER_ADMIN_TOKEN=replace-with-a-secret \
+NODE_ENV=production npm start
 ```
 
 ## Included
@@ -23,7 +25,7 @@ PUBLIC_SITE_URL=https://your-domain.example npm start
 - Curated live updates feed, upcoming dates, search, tabs, timestamps and alert subscription interaction.
 - Long-form article reader following the familiar government-job information pattern: Name of Post, Post Date / Update, Short Information, Important Dates, Application Fee, Age Limit, Vacancy / Update Details, Eligibility, documents, salary/pay scale, selection process, syllabus, how-to steps, Important Links and FAQ.
 - Official-source CTA, source evidence excerpt, source verification badge, candidate checklist, correction/terms/privacy/editorial policy surfaces and candidate disclaimer.
-- Publisher Console with an allowlisted official-source registry, a 60-second scan interval, conditional HTTP requests, retry handling, SHA-256 change fingerprints, source status, Detect → Extract → Optimize → Publish pipeline, activity log, persistent state, confidence-based auto-publish and review queue.
+- Publisher Console with a 113-source allowlisted official-source registry, a 60-second scan interval, concurrency-limited conditional HTTP requests, retry handling, SHA-256 change fingerprints, source status, Detect → Extract → Optimize → Publish pipeline, activity log, persistent state, confidence-based auto-publish and review queue.
 - Vite middleware API at `/api/publisher/state`, `/api/publisher/scan` and `/api/publisher/publish` for the preview workflow. `publisher-engine.mjs` is the server-side source/publisher boundary.
 - Production `server.mjs` serves the built site, dynamic `/sitemap.xml`, `/robots.txt`, API routes and SEO metadata for `/updates/:slug` article URLs.
 - Dynamic article URL, canonical metadata, Article JSON-LD and shareable per-update paths.

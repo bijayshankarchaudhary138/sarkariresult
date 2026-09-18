@@ -10,6 +10,13 @@ const dist = join(root, 'dist');
 const port = Number(process.env.PORT || 4173);
 const host = process.env.HOST || '0.0.0.0';
 const publicSiteUrl = (process.env.PUBLIC_SITE_URL || `http://localhost:${port}`).replace(/\/$/, '');
+const publisherAdminToken = process.env.PUBLISHER_ADMIN_TOKEN || '';
+
+function isAdmin(req) {
+  if (!publisherAdminToken) return process.env.NODE_ENV !== 'production';
+  const bearer = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  return bearer === publisherAdminToken || req.headers['x-publisher-token'] === publisherAdminToken;
+}
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -91,8 +98,12 @@ async function serveStatic(req, res) {
 async function handle(req, res) {
   const url = new URL(req.url, publicSiteUrl);
   if (url.pathname === '/api/publisher/state' && req.method === 'GET') return sendJson(res, 200, getState());
-  if (url.pathname === '/api/publisher/scan' && req.method === 'POST') return sendJson(res, 200, await scanSources({ force: url.searchParams.get('force') === '1' }));
+  if (url.pathname === '/api/publisher/scan' && req.method === 'POST') {
+    if (!isAdmin(req)) return sendJson(res, 401, { error: 'Publisher admin authorization required' });
+    return sendJson(res, 200, await scanSources({ force: url.searchParams.get('force') === '1' }));
+  }
   if (url.pathname === '/api/publisher/publish' && req.method === 'POST') {
+    if (!isAdmin(req)) return sendJson(res, 401, { error: 'Publisher admin authorization required' });
     const body = await readBody(req);
     const article = publishArticle(body.id || body.slug);
     return sendJson(res, article ? 200 : 404, article || { error: 'Article not found' });

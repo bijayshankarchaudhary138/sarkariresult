@@ -5,6 +5,7 @@ import sources from './publisher-sources.json' with { type: 'json' };
 
 const SCAN_INTERVAL_MS = 60_000;
 const FETCH_TIMEOUT_MS = 8_000;
+const SOURCE_CONCURRENCY = 18;
 const MAX_EXCERPT_LENGTH = 420;
 const DATA_DIR = process.env.PUBLISHER_DATA_DIR || '.publisher-data';
 const STATE_FILE = join(DATA_DIR, 'state.json');
@@ -164,6 +165,19 @@ function sourceExcerpt(text) {
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function mapWithConcurrency(items, worker, limit = SOURCE_CONCURRENCY) {
+  const results = new Array(items.length);
+  let cursor = 0;
+  async function runner() {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await worker(items[index], index);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, runner));
+  return results;
 }
 
 async function fetchSource(source) {
@@ -329,7 +343,8 @@ export async function scanSources({ force = false } = {}) {
   state.lastScanStartedAt = now();
   addActivity({ type: 'scan_started', title: `Scan #${state.scanNumber} started`, detail: `${sources.filter(source => source.enabled).length} allowlisted official sources checked`, status: 'running' });
   try {
-    const results = await Promise.all(sources.filter(source => source.enabled).map(source => fetchSource(source)));
+    const enabledSources = sources.filter(source => source.enabled);
+    const results = await mapWithConcurrency(enabledSources, source => fetchSource(source));
     let changedCount = 0;
     let newDrafts = 0;
     results.forEach(({ source, result }) => {

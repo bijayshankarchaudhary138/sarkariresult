@@ -442,7 +442,7 @@ function render() {
               <div class="pulse-metric"><div class="metric-number">12</div><div><span>नई updates आज</span><b>+28% <small>vs last week</small></b></div></div>
               <div class="mini-chart" aria-label="Weekly update activity"><span style="height:31%"></span><span style="height:43%"></span><span style="height:38%"></span><span style="height:57%"></span><span style="height:51%"></span><span style="height:73%"></span><span class="chart-current" style="height:94%"></span></div>
               <div class="pulse-footer"><span>${icon('clock')} Last sync <b id="sync-time">09:42:18 AM</b></span><span class="sync-status"><i></i> All systems go</span></div>
-              <div class="source-strip"><span>Watching official sources</span><span class="source-badges"><b>BPSC</b><b>SSC</b><b>UPSC</b><b>+11</b></span></div>
+              <div class="source-strip"><span>Watching official sources</span><span class="source-badges" id="homepage-source-badges"><b>BPSC</b><b>SSC</b><b>UPSC</b><b>+110</b></span></div>
             </div>
           </div>
         </section>
@@ -450,7 +450,7 @@ function render() {
         <section class="stats-section">
           <div class="container stats-grid">
             <div class="stat-cell"><span class="stat-icon blue-icon">${icon('briefcase')}</span><div><strong>1,284</strong><span>Active updates</span></div></div>
-            <div class="stat-cell"><span class="stat-icon orange-icon">${icon('globe')}</span><div><strong>14</strong><span>Live source feeds</span></div></div>
+            <div class="stat-cell"><span class="stat-icon orange-icon">${icon('globe')}</span><div><strong id="source-count-stat">113</strong><span>Live source feeds</span></div></div>
             <div class="stat-cell"><span class="stat-icon purple-icon">${icon('external')}</span><div><strong>97%</strong><span>Direct source links</span></div></div>
             <div class="stat-cell"><span class="stat-icon green-icon">${icon('lightning')}</span><div><strong>60 sec</strong><span>Avg. publish time</span></div></div>
             <div class="stat-note"><span class="note-spark">✦</span><span><b>Freshness matters.</b><br />हर update को timestamp मिलता है।</span></div>
@@ -497,7 +497,7 @@ function render() {
             <div class="workflow-copy"><div class="section-kicker light-kicker">BUILT FOR SPEED & CLARITY</div><h2>Official खबर से<br /><span>एक-click apply तक।</span></h2><p>नौकरीसेतु का smart workflow candidate की सबसे बड़ी परेशानी हल करता है — सही update को सही समय पर, सही context के साथ सामने लाना।</p><button class="workflow-button" data-action="publisher">Publisher Console खोलें ${icon('arrow')}</button></div>
             <div class="workflow-steps">
               <div class="workflow-line"></div>
-              <div class="workflow-step"><div class="step-number">01</div><div class="step-icon">${icon('globe')}</div><div><b>Official source detect</b><p>14 allowlisted portals पर नया notice आते ही signal मिलता है।</p></div><span class="step-status">LIVE</span></div>
+              <div class="workflow-step"><div class="step-number">01</div><div class="step-icon">${icon('globe')}</div><div><b>Official source detect</b><p id="workflow-source-count">113 allowlisted portals पर नया notice आते ही signal मिलता है।</p></div><span class="step-status">LIVE</span></div>
               <div class="workflow-step"><div class="step-number">02</div><div class="step-icon">${icon('sparkles')}</div><div><b>Human-first article</b><p>एक consistent format में facts, dates और apply steps draft होते हैं।</p></div><span class="step-status">AUTO</span></div>
               <div class="workflow-step"><div class="step-number">03</div><div class="step-icon">${icon('external')}</div><div><b>Publish & apply</b><p>SEO metadata, internal links और official CTA के साथ live करें।</p></div><span class="step-status">READY</span></div>
               <div class="workflow-footnote">${icon('shield')} हर article पर source, timestamp और disclaimer अपने-आप जुड़ता है।</div>
@@ -759,6 +759,11 @@ function applyPublisherState(state) {
   const online = state.sources?.filter(source => source.status === 'online').length || 0;
   const highPriority = state.sources?.filter(source => source.priority === 'high' && source.status === 'online').length || 0;
   const drafts = state.articles?.filter(article => article.status !== 'published').length || 0;
+  const sourceCount = state.activeSourceCount || state.sourceCount || 0;
+  document.querySelector('#source-count-stat')?.replaceChildren(document.createTextNode(String(sourceCount)));
+  document.querySelector('#workflow-source-count')?.replaceChildren(document.createTextNode(`${sourceCount} allowlisted portals पर नया notice आते ही signal मिलता है।`));
+  const homepageBadges = document.querySelector('#homepage-source-badges');
+  if (homepageBadges) homepageBadges.innerHTML = `<b>BPSC</b><b>SSC</b><b>UPSC</b><b>+${Math.max(sourceCount - 3, 0)}</b>`;
   const lastScan = state.lastScanFinishedAt ? new Date(state.lastScanFinishedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Waiting';
   const monitoring = document.querySelector('#publisher-monitoring');
   if (monitoring) monitoring.innerHTML = `<i></i> Monitoring ${state.activeSourceCount || state.sourceCount || 0} official sources`;
@@ -942,5 +947,6 @@ function tick() {
 }
 
 render();
+refreshPublisherState();
 handleArticleRoute();
 setInterval(tick, 1000);
