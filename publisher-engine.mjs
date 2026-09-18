@@ -301,7 +301,7 @@ function articleFromResult(source, result) {
     confidence: result.links.length > 0 && result.dates.length > 0 ? 'high' : 'review',
     seo: {
       title: `${title} | Apply Online, Result, Admit Card & Details 2026`,
-      description: `${title}. Check official dates, eligibility, important links and the latest notice directly from ${source.officialDomain}.`,
+      description: `${title}. Check official dates, eligibility, important links and the latest notice directly from ${source.officialDomain}.`.slice(0, 155),
       canonicalPath: `/updates/${slug}`
     },
     facts: {

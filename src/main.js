@@ -636,12 +636,13 @@ function escapeHtml(value = '') {
 }
 
 function setArticleSeo(item, slug) {
-  const description = `${item.detail || item.title} Official dates, eligibility, important links and verified source details.`;
-  document.title = `${item.title} | नौकरीसेतु`;
+  const description = `${item.detail || item.title} Official dates, eligibility, important links and verified source details.`.slice(0, 155);
+  document.title = `${item.title} | नौकरीसेतु`.slice(0, 68);
   const descriptionMeta = document.querySelector('meta[name="description"]');
   descriptionMeta?.setAttribute('content', description);
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+  document.querySelector('meta[name="robots"]')?.setAttribute('content', item.sourceArticle?.status === 'draft' ? 'noindex,nofollow' : 'index,follow,max-image-preview:large');
   let canonical = document.querySelector('link[rel="canonical"]');
   if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
   canonical.href = `${window.location.origin}/updates/${slug}`;
@@ -657,6 +658,9 @@ function setArticleSeo(item, slug) {
     dateModified: new Date().toISOString(),
     author: { '@type': 'Organization', name: 'नौकरीसेतु Editorial Desk' },
     publisher: { '@type': 'Organization', name: 'नौकरीसेतु' },
+    keywords: item.tags || ['सरकारी नौकरी', 'सरकारी रिजल्ट'],
+    breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'होम', item: window.location.origin }, { '@type': 'ListItem', position: 2, name: item.categoryLabel || 'Updates', item: `${window.location.origin}/#directory` }, { '@type': 'ListItem', position: 3, name: item.title, item: `${window.location.origin}/updates/${slug}` }] },
+    mainEntity: [{ '@type': 'Question', name: `${item.title} का official link कहां मिलेगा?`, acceptedAnswer: { '@type': 'Answer', text: `Official source link ${item.official || 'संबंधित विभाग की website'} पर उपलब्ध है।` } }],
     mainEntityOfPage: `${window.location.origin}/updates/${slug}`
   });
   document.head.appendChild(schema);
@@ -667,6 +671,7 @@ function restoreHomeSeo() {
   document.querySelector('meta[name="description"]')?.setAttribute('content', 'नौकरीसेतु पर सरकारी नौकरी, रिजल्ट, एडमिट कार्ड, आंसर की और ऑनलाइन फॉर्म की verified जानकारी — official links के साथ।');
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', 'नौकरीसेतु — हर सरकारी अवसर, एक भरोसेमंद जगह');
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', 'सरकारी नौकरी और परीक्षा अपडेट, official source से सीधे आपके लिए।');
+  document.querySelector('meta[name="robots"]')?.setAttribute('content', 'index,follow,max-image-preview:large');
   document.querySelector('#dynamic-article-schema')?.remove();
   document.querySelector('link[rel="canonical"]')?.remove();
 }

@@ -56,7 +56,7 @@ function readBody(req) {
 function sitemapXml() {
   const state = getState();
   const staticPaths = ['/', '/#directory', '/#updates', '/#guides'];
-  const articlePaths = state.articles.map(article => `/updates/${article.slug}`);
+  const articlePaths = state.articles.filter(article => article.status === 'published').map(article => `/updates/${article.slug}`);
   const urls = [...new Set([...staticPaths, ...articlePaths])].map(path => `<url><loc>${publicSiteUrl}${path}</loc><changefreq>${path.startsWith('/updates/') ? 'hourly' : 'daily'}</changefreq><priority>${path === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
   return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
 }
@@ -68,12 +68,13 @@ async function serveIndex(req, res) {
     const slug = decodeURIComponent(pathname.slice('/updates/'.length));
     const article = getArticle(slug);
     const title = article?.seo?.title || `${slug.replace(/-/g, ' ')} | नौकरीसेतु`;
-    const description = article?.seo?.description || 'सरकारी नौकरी, रिजल्ट, एडमिट कार्ड और official notification की verified जानकारी।';
-    const schema = article ? `<script id="server-article-schema" type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: article.title, description, dateModified: article.updatedAt || article.createdAt, author: { '@type': 'Organization', name: 'नौकरीसेतु Editorial Desk' }, mainEntityOfPage: `${publicSiteUrl}${pathname}` })}</script>` : '';
+    const description = (article?.seo?.description || 'सरकारी नौकरी, रिजल्ट, एडमिट कार्ड और official notification की verified जानकारी।').slice(0, 155);
+    const schema = article ? `<script id="server-article-schema" type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: article.title, description, dateModified: article.updatedAt || article.createdAt, author: { '@type': 'Organization', name: 'नौकरीसेतु Editorial Desk' }, breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'होम', item: publicSiteUrl }, { '@type': 'ListItem', position: 2, name: article.category || 'Updates', item: `${publicSiteUrl}/#directory` }, { '@type': 'ListItem', position: 3, name: article.title, item: `${publicSiteUrl}${pathname}` }] }, mainEntityOfPage: `${publicSiteUrl}${pathname}` })}</script>` : '';
+    const visibilityMeta = article?.status === 'published' ? '' : '<meta name="robots" content="noindex,nofollow" />';
     html = html
       .replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`)
       .replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${description.replace(/"/g, '&quot;')}" />`)
-      .replace('</head>', `<link rel="canonical" href="${publicSiteUrl}${pathname}" />${schema}</head>`);
+      .replace('</head>', `${visibilityMeta}<link rel="canonical" href="${publicSiteUrl}${pathname}" />${schema}</head>`);
   }
   send(res, 200, html, 'text/html; charset=utf-8');
 }
