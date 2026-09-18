@@ -1,3 +1,5 @@
+import './style.css';
+
 const iconPaths = {
   search: '<circle cx="11" cy="11" r="7.5"></circle><path d="m16.5 16.5 5 5"></path>',
   arrow: '<path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path>',
