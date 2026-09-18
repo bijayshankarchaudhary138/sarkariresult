@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { createReadStream } from 'node:fs';
 import { access, readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, sep } from 'node:path';
+import { basename, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getArticle, getState, publishArticle, scanSources, startMonitor } from './publisher-engine.mjs';
 import { getSocialAssetPath, getSocialState, processSocialQueue, startSocialMonitor } from './social-distribution.mjs';
@@ -72,7 +72,8 @@ async function serveIndex(req, res) {
     const description = (article?.seo?.description || 'सरकारी नौकरी, रिजल्ट, एडमिट कार्ड और official notification की verified जानकारी।').slice(0, 155);
     const schema = article ? `<script id="server-article-schema" type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: article.title, description, dateModified: article.updatedAt || article.createdAt, author: { '@type': 'Organization', name: 'नौकरीसेतु Editorial Desk' }, breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'होम', item: publicSiteUrl }, { '@type': 'ListItem', position: 2, name: article.category || 'Updates', item: `${publicSiteUrl}/#directory` }, { '@type': 'ListItem', position: 3, name: article.title, item: `${publicSiteUrl}${pathname}` }] }, mainEntityOfPage: `${publicSiteUrl}${pathname}` })}</script>` : '';
     const visibilityMeta = article?.status === 'published' ? '' : '<meta name="robots" content="noindex,nofollow" />';
-    const socialImage = article ? `${publicSiteUrl}/media/social/${encodeURIComponent(`${article.slug}-article.svg`)}` : '';
+    const socialAsset = article ? (getSocialAssetPath(`${article.slug}-article.png`) || getSocialAssetPath(`${article.slug}-article.svg`)) : null;
+    const socialImage = socialAsset ? `${publicSiteUrl}/media/social/${encodeURIComponent(basename(socialAsset))}` : '';
     html = html
       .replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`)
       .replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${description.replace(/"/g, '&quot;')}" />`)
@@ -106,7 +107,8 @@ async function handle(req, res) {
     try {
       await access(assetPath);
       res.statusCode = 200;
-      res.setHeader('content-type', 'image/svg+xml; charset=utf-8');
+      const mediaType = /\.png$/i.test(assetPath) ? 'image/png' : /\.jpe?g$/i.test(assetPath) ? 'image/jpeg' : 'image/svg+xml; charset=utf-8';
+      res.setHeader('content-type', mediaType);
       res.setHeader('cache-control', 'public, max-age=3600');
       return createReadStream(assetPath).pipe(res);
     } catch {

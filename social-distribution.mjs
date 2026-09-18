@@ -1,6 +1,10 @@
 import crypto from 'node:crypto';
+import { execFile } from 'node:child_process';
 import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { promisify } from 'node:util';
 import { join, basename } from 'node:path';
+
+const execFileAsync = promisify(execFile);
 
 const DATA_DIR = process.env.PUBLISHER_DATA_DIR || '.publisher-data';
 const SOCIAL_STATE_FILE = join(DATA_DIR, 'social-state.json');
@@ -108,16 +112,41 @@ export async function hydrateSocialState() {
   return getSocialState();
 }
 
+function plainImageText(value = '') {
+  return String(value).replace(/[^\x20-\x7E]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function renderPng(filePath, article, type) {
+  const title = plainImageText(type === 'syllabus' ? `Syllabus / Pattern - ${article.title}` : article.title).slice(0, 92) || 'Official career update';
+  const source = plainImageText(article.officialDomain || article.sourceName || 'official source').slice(0, 54);
+  const url = socialUrl(article).replace(/^https?:\/\//, '').slice(0, 70);
+  const args = ['-size', '1080x1350', 'xc:#102b4e', '-font', 'DejaVu-Sans', '-fill', '#f1c15d', '-pointsize', '30', '-gravity', 'NorthWest', '-annotate', '+90+125', 'NAUKRISETU', '-fill', '#b8cbed', '-pointsize', '23', '-annotate', '+90+190', type === 'syllabus' ? 'SYLLABUS / EXAM PATTERN' : 'VERIFIED CAREER UPDATE', '-fill', '#ffffff', '-pointsize', '48', '-annotate', '+90+510', title, '-fill', '#dce7ff', '-pointsize', '24', '-annotate', '+90+940', `Official source: ${source}`, '-fill', '#f1c15d', '-pointsize', '24', '-annotate', '+90+1130', url, filePath];
+  await execFileAsync(process.env.IMAGE_MAGICK_BIN || 'convert', args, { timeout: 15_000 });
+}
+
 async function ensureAsset(article, type = 'article') {
   await mkdir(SOCIAL_ASSET_DIR, { recursive: true });
-  const filename = `${slugSafe(article.slug || article.title)}-${type}.svg`;
-  const filePath = join(SOCIAL_ASSET_DIR, filename);
+  const stem = `${slugSafe(article.slug || article.title)}-${type}`;
+  const svgFilename = `${stem}.svg`;
+  const svgPath = join(SOCIAL_ASSET_DIR, svgFilename);
   try {
-    await access(filePath);
+    await access(svgPath);
   } catch {
-    await writeFile(filePath, buildAsset(article, type), 'utf8');
+    await writeFile(svgPath, buildAsset(article, type), 'utf8');
   }
-  return { filename, filePath, url: `${PUBLIC_SITE_URL}/media/social/${encodeURIComponent(filename)}` };
+  const pngFilename = `${stem}.png`;
+  const pngPath = join(SOCIAL_ASSET_DIR, pngFilename);
+  try {
+    await access(pngPath);
+    return { filename: pngFilename, filePath: pngPath, url: `${PUBLIC_SITE_URL}/media/social/${encodeURIComponent(pngFilename)}` };
+  } catch {
+    try {
+      await renderPng(pngPath, article, type);
+      return { filename: pngFilename, filePath: pngPath, url: `${PUBLIC_SITE_URL}/media/social/${encodeURIComponent(pngFilename)}` };
+    } catch {
+      return { filename: svgFilename, filePath: svgPath, url: `${PUBLIC_SITE_URL}/media/social/${encodeURIComponent(svgFilename)}` };
+    }
+  }
 }
 
 function scheduledSlot(type = 'article') {
@@ -261,7 +290,7 @@ export async function processSocialQueue({ force = false } = {}) {
 
 export function getSocialAssetPath(filename) {
   const safe = basename(filename);
-  if (safe !== filename || !safe.endsWith('.svg')) return null;
+  if (safe !== filename || !/\.(svg|png|jpe?g)$/i.test(safe)) return null;
   return join(SOCIAL_ASSET_DIR, safe);
 }
 
