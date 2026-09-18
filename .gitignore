@@ -1,3 +1,4 @@
 node_modules/
 dist/
+.publisher-data/
 .DS_Store

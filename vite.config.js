@@ -8,6 +8,21 @@ function json(res, payload, status = 200) {
   res.end(JSON.stringify(payload));
 }
 
+function xml(res, payload) {
+  res.statusCode = 200;
+  res.setHeader('content-type', 'application/xml; charset=utf-8');
+  res.setHeader('cache-control', 'no-store');
+  res.end(payload);
+}
+
+function sitemapXml() {
+  const state = getState();
+  const base = (process.env.PUBLIC_SITE_URL || 'http://localhost:5173').replace(/\/$/, '');
+  const paths = ['/', '/#directory', '/#updates', '/#guides', ...state.articles.map(article => `/updates/${article.slug}`)];
+  const urls = [...new Set(paths)].map(path => `<url><loc>${base}${path}</loc><changefreq>${path.startsWith('/updates/') ? 'hourly' : 'daily'}</changefreq><priority>${path === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
+}
+
 function readJsonBody(req) {
   return new Promise(resolve => {
     let raw = '';
@@ -23,6 +38,10 @@ function publisherApi() {
     name: 'naukrisetu-publisher-api',
     configureServer(server) {
       startMonitor();
+      server.middlewares.use((req, res, next) => {
+        if ((req.url || '').split('?')[0] === '/sitemap.xml') return xml(res, sitemapXml());
+        next();
+      });
       server.middlewares.use('/api/publisher', async (req, res, next) => {
         const url = new URL(req.url || '/', 'http://localhost');
         if (req.method === 'GET' && url.pathname === '/state') {
@@ -50,6 +69,10 @@ function publisherApi() {
     },
     configurePreviewServer(server) {
       startMonitor();
+      server.middlewares.use((req, res, next) => {
+        if ((req.url || '').split('?')[0] === '/sitemap.xml') return xml(res, sitemapXml());
+        next();
+      });
       server.middlewares.use('/api/publisher', async (req, res, next) => {
         const url = new URL(req.url || '/', 'http://localhost');
         if (req.method === 'GET' && url.pathname === '/state') return json(res, getState());

@@ -1,10 +1,13 @@
 import crypto from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import sources from './publisher-sources.json' with { type: 'json' };
 
 const SCAN_INTERVAL_MS = 60_000;
 const FETCH_TIMEOUT_MS = 8_000;
 const MAX_EXCERPT_LENGTH = 420;
+const DATA_DIR = process.env.PUBLISHER_DATA_DIR || '.publisher-data';
+const STATE_FILE = join(DATA_DIR, 'state.json');
 const state = {
   startedAt: new Date().toISOString(),
   lastScanStartedAt: null,
@@ -23,6 +26,13 @@ const state = {
     responseMs: null,
     httpStatus: null,
     contentHash: null,
+    etag: null,
+    lastModified: null,
+    title: null,
+    excerpt: null,
+    dates: [],
+    links: [],
+    robotsAllowed: true,
     changed: false,
     noticeCount: 0,
     error: null
@@ -34,9 +44,56 @@ const state = {
 const sourceById = Object.fromEntries(sources.map(source => [source.id, source]));
 let intervalHandle;
 let initialScanHandle;
+let storageReady = false;
+let storageWrite = Promise.resolve();
+let monitorReady = Promise.resolve();
 
 function now() {
   return new Date().toISOString();
+}
+
+function serializeState() {
+  return JSON.stringify({
+    version: 1,
+    savedAt: now(),
+    lastScanStartedAt: state.lastScanStartedAt,
+    lastScanFinishedAt: state.lastScanFinishedAt,
+    scanNumber: state.scanNumber,
+    sources: state.sources,
+    activities: state.activities,
+    articles: state.articles
+  }, null, 2);
+}
+
+async function persistState() {
+  if (!storageReady) return;
+  storageWrite = storageWrite.then(async () => {
+    await mkdir(DATA_DIR, { recursive: true });
+    const temporaryFile = `${STATE_FILE}.tmp`;
+    await writeFile(temporaryFile, serializeState(), 'utf8');
+    await rename(temporaryFile, STATE_FILE);
+  }).catch(error => {
+    addActivity({ type: 'storage_error', title: 'State save failed', detail: error.message, status: 'error' });
+  });
+  return storageWrite;
+}
+
+export async function hydrateState() {
+  try {
+    const saved = JSON.parse(await readFile(STATE_FILE, 'utf8'));
+    state.lastScanStartedAt = saved.lastScanStartedAt || null;
+    state.lastScanFinishedAt = saved.lastScanFinishedAt || null;
+    state.scanNumber = Number(saved.scanNumber || 0);
+    state.activities = Array.isArray(saved.activities) ? saved.activities.slice(0, 30) : [];
+    state.articles = Array.isArray(saved.articles) ? saved.articles.slice(0, 100) : [];
+    Object.entries(saved.sources || {}).forEach(([id, sourceState]) => {
+      if (state.sources[id]) Object.assign(state.sources[id], sourceState, { status: 'waiting', changed: false });
+    });
+  } catch (error) {
+    if (error.code !== 'ENOENT') addActivity({ type: 'storage_error', title: 'Saved state could not be loaded', detail: error.message, status: 'error' });
+  }
+  storageReady = true;
+  return getState();
 }
 
 function addActivity(activity) {
@@ -105,78 +162,110 @@ function sourceExcerpt(text) {
   return excerpt || 'Official source content fetched successfully. Open the source link to review the latest notice.';
 }
 
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function fetchSource(source) {
   const started = Date.now();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(source.url, {
-      signal: controller.signal,
-      redirect: 'follow',
-      headers: {
+  const sourceState = state.sources[source.id];
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const headers = {
         'user-agent': 'NaukriSetu-SourceMonitor/1.0 (+official-source-review)',
         accept: 'text/html,application/xhtml+xml,application/pdf;q=0.8,*/*;q=0.5'
+      };
+      if (sourceState.etag) headers['if-none-match'] = sourceState.etag;
+      if (sourceState.lastModified) headers['if-modified-since'] = sourceState.lastModified;
+      const response = await fetch(source.url, { signal: controller.signal, redirect: 'follow', headers });
+      const checkedAt = now();
+      const responseHeaders = {
+        etag: response.headers.get('etag') || sourceState.etag || null,
+        lastModified: response.headers.get('last-modified') || sourceState.lastModified || null
+      };
+      if (response.status === 304) {
+        const result = {
+          id: source.id,
+          status: 'online',
+          httpStatus: 304,
+          responseMs: Date.now() - started,
+          contentHash: sourceState.contentHash,
+          etag: responseHeaders.etag,
+          lastModified: responseHeaders.lastModified,
+          changed: false,
+          title: sourceState.title || `${source.name} official source`,
+          excerpt: sourceState.excerpt || '',
+          dates: sourceState.dates || [],
+          links: sourceState.links || [],
+          checkedAt,
+          error: null
+        };
+        Object.assign(sourceState, result, { lastCheckedAt: checkedAt });
+        return { source, result };
       }
-    });
-    const body = await response.text();
-    const text = stripMarkup(body);
-    const title = extractTitle(body, source);
-    const dates = extractDates(text);
-    const links = extractOfficialLinks(body, source.url);
-    const fingerprint = JSON.stringify({ title, dates, links: links.map(link => link.url) });
-    const hash = crypto.createHash('sha256').update(fingerprint).digest('hex');
-    const previousHash = state.sources[source.id].contentHash;
-    const changed = Boolean(previousHash && previousHash !== hash);
-    const result = {
-      id: source.id,
-      status: response.ok ? 'online' : 'warning',
-      httpStatus: response.status,
-      responseMs: Date.now() - started,
-      contentHash: hash,
-      changed,
-      title,
-      excerpt: sourceExcerpt(text),
-      dates,
-      links,
-      checkedAt: now(),
-      error: response.ok ? null : `HTTP ${response.status}`
-    };
-    Object.assign(state.sources[source.id], {
-      status: result.status,
-      httpStatus: result.httpStatus,
-      responseMs: result.responseMs,
-      contentHash: result.contentHash,
-      changed: result.changed,
-      lastCheckedAt: result.checkedAt,
-      error: result.error
-    });
-    return { source, result };
-  } catch (error) {
-    const result = {
-      id: source.id,
-      status: 'offline',
-      httpStatus: null,
-      responseMs: Date.now() - started,
-      contentHash: null,
-      changed: false,
-      title: `${source.name} source unavailable`,
-      excerpt: '',
-      dates: [],
-      links: [],
-      checkedAt: now(),
-      error: error.name === 'AbortError' ? 'Timeout after 8 seconds' : error.message
-    };
-    Object.assign(state.sources[source.id], {
-      status: result.status,
-      httpStatus: result.httpStatus,
-      responseMs: result.responseMs,
-      lastCheckedAt: result.checkedAt,
-      error: result.error
-    });
-    return { source, result };
-  } finally {
-    clearTimeout(timeout);
+      const body = await response.text();
+      const text = stripMarkup(body);
+      const title = extractTitle(body, source);
+      const dates = extractDates(text);
+      const links = extractOfficialLinks(body, source.url);
+      const fingerprint = JSON.stringify({ title, dates, links: links.map(link => link.url) });
+      const hash = crypto.createHash('sha256').update(fingerprint).digest('hex');
+      const previousHash = sourceState.contentHash;
+      const changed = Boolean(previousHash && previousHash !== hash);
+      const result = {
+        id: source.id,
+        status: response.ok ? 'online' : 'warning',
+        httpStatus: response.status,
+        responseMs: Date.now() - started,
+        contentHash: hash,
+        etag: responseHeaders.etag,
+        lastModified: responseHeaders.lastModified,
+        changed,
+        title,
+        excerpt: sourceExcerpt(text),
+        dates,
+        links,
+        checkedAt,
+        error: response.ok ? null : `HTTP ${response.status}`
+      };
+      Object.assign(sourceState, result, { lastCheckedAt: checkedAt });
+      if (response.status >= 500 && attempt === 0) {
+        await wait(350);
+        continue;
+      }
+      return { source, result };
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) {
+        await wait(350);
+        continue;
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
   }
+  const checkedAt = now();
+  const result = {
+    id: source.id,
+    status: 'offline',
+    httpStatus: null,
+    responseMs: Date.now() - started,
+    contentHash: sourceState.contentHash,
+    etag: sourceState.etag,
+    lastModified: sourceState.lastModified,
+    changed: false,
+    title: sourceState.title || `${source.name} source unavailable`,
+    excerpt: sourceState.excerpt || '',
+    dates: sourceState.dates || [],
+    links: sourceState.links || [],
+    checkedAt,
+    error: lastError?.name === 'AbortError' ? 'Timeout after 8 seconds' : lastError?.message || 'Source request failed'
+  };
+  Object.assign(sourceState, result, { lastCheckedAt: checkedAt });
+  return { source, result };
 }
 
 function articleFromResult(source, result) {
@@ -265,6 +354,7 @@ export async function scanSources({ force = false } = {}) {
     });
     addActivity({ type: 'scan_finished', title: `Scan #${state.scanNumber} finished`, detail: changedCount ? `${newDrafts} article draft(s) queued for verification` : 'No new official notice fingerprint detected', status: changedCount ? 'drafts' : 'clean' });
     state.lastScanFinishedAt = now();
+    await persistState();
   } finally {
     state.scanRunning = false;
   }
@@ -278,6 +368,7 @@ export function publishArticle(articleId) {
   article.publishedAt = now();
   article.updatedAt = article.publishedAt;
   addActivity({ type: 'article_published', articleId: article.id, title: article.title, detail: `Published from ${article.officialDomain}`, status: 'published' });
+  persistState();
   return article;
 }
 
@@ -304,12 +395,13 @@ export function getState() {
 
 export function startMonitor() {
   if (intervalHandle) return;
+  monitorReady = hydrateState();
   intervalHandle = setInterval(() => {
-    scanSources().catch(error => addActivity({ type: 'scan_error', title: 'Scheduled scan failed', detail: error.message, status: 'error' }));
+    monitorReady.then(() => scanSources()).catch(error => addActivity({ type: 'scan_error', title: 'Scheduled scan failed', detail: error.message, status: 'error' }));
   }, SCAN_INTERVAL_MS);
   intervalHandle.unref?.();
   initialScanHandle = setTimeout(() => {
-    scanSources().catch(error => addActivity({ type: 'scan_error', title: 'Initial scan failed', detail: error.message, status: 'error' }));
+    monitorReady.then(() => scanSources()).catch(error => addActivity({ type: 'scan_error', title: 'Initial scan failed', detail: error.message, status: 'error' }));
   }, 1_500);
   initialScanHandle.unref?.();
 }
@@ -322,7 +414,5 @@ export function stopMonitor() {
 }
 
 export async function loadPersistedState() {
-  // Reserved for a database adapter. Keeping the engine in-memory makes the demo safe
-  // and avoids writing candidate data during preview; production should use a queue/DB.
-  await readFile(new URL('./publisher-sources.json', import.meta.url), 'utf8');
+  return hydrateState();
 }
