@@ -580,7 +580,14 @@ function bindEvents() {
     document.querySelector('#updates').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }));
 
-  document.querySelectorAll('[data-article]').forEach(button => button.addEventListener('click', () => openArticle(button.dataset.article)));
+    document.querySelectorAll('[data-article]').forEach(button => {
+      if (button.closest('#feed-list')) return;
+      button.addEventListener('click', () => openArticle(button.dataset.article));
+    });
+    document.querySelector('#feed-list')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-article]');
+      if (button) openArticle(button.dataset.article);
+    });
   document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => showToast(`${button.dataset.section} section की पूरी list जल्द available होगी`)));
   document.querySelector('#directory-search')?.addEventListener('input', event => filterDirectory(event.target.value));
   document.querySelectorAll('[data-dir-filter]').forEach(button => button.addEventListener('click', () => {
@@ -757,7 +764,7 @@ function renderRemoteActivity(state = remotePublisherState) {
 
 function applyPublisherState(state) {
   remotePublisherState = state;
-  state.articles?.map(remoteArticleToItem).forEach(item => {
+  state.articles?.filter(article => article.status === 'published').map(remoteArticleToItem).forEach(item => {
     if (!updates.some(update => update.id === item.id)) updates.unshift(item);
   });
   if (document.querySelector('#feed-list')) document.querySelector('#feed-list').innerHTML = renderFeed();
@@ -902,6 +909,7 @@ function remoteArticleToItem(article) {
     categoryLabel: article.category || 'Official Update',
     source: `${article.sourceName} • Official source`,
     title: article.title,
+    hindiTitle: article.title,
     detail: article.sections?.overview || `Official update detected from ${article.officialDomain}.`,
     stat: article.facts?.dates?.[0] || 'Official notice',
     status: article.status === 'published' ? 'Published' : 'Source review',
@@ -944,8 +952,8 @@ function tick() {
   if (countdown <= 0) {
     countdown = 60;
     document.querySelector('#sync-time')?.replaceChildren(document.createTextNode(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })));
-    if (remotePublisherState) runRemoteScan();
-    showToast('Feed refreshed — official source scan cycle complete');
+    if (remotePublisherState) refreshPublisherState();
+    showToast('Feed refreshed — latest official notices checked');
   }
   document.querySelector('#countdown')?.replaceChildren(document.createTextNode(`${countdown}s`));
   document.querySelector('#publisher-countdown')?.replaceChildren(document.createTextNode(`${countdown}s`));
