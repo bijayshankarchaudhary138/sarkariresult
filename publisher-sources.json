@@ -1,0 +1,128 @@
+[
+  {
+    "id": "bpsc",
+    "name": "BPSC Bihar",
+    "category": "State PSC",
+    "url": "https://bpsc.bihar.gov.in/",
+    "officialDomain": "bpsc.bihar.gov.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "ssc",
+    "name": "Staff Selection Commission",
+    "category": "Central Jobs",
+    "url": "https://ssc.gov.in/",
+    "officialDomain": "ssc.gov.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "upsc",
+    "name": "Union Public Service Commission",
+    "category": "Central Jobs",
+    "url": "https://upsc.gov.in/",
+    "officialDomain": "upsc.gov.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "rrb",
+    "name": "Railway Recruitment Board",
+    "category": "Railways",
+    "url": "https://www.rrbcdg.gov.in/",
+    "officialDomain": "rrbcdg.gov.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "ibps",
+    "name": "Institute of Banking Personnel Selection",
+    "category": "Banking",
+    "url": "https://www.ibps.in/",
+    "officialDomain": "ibps.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "nta",
+    "name": "National Testing Agency",
+    "category": "Entrance & Education",
+    "url": "https://exams.nta.ac.in/",
+    "officialDomain": "exams.nta.ac.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "csbc",
+    "name": "Central Selection Board of Constable",
+    "category": "Police",
+    "url": "https://csbc.bihar.gov.in/",
+    "officialDomain": "csbc.bihar.gov.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "dsssb",
+    "name": "DSSSB Delhi",
+    "category": "State Jobs",
+    "url": "https://dsssb.delhi.gov.in/",
+    "officialDomain": "dsssb.delhi.gov.in",
+    "enabled": true,
+    "priority": "high"
+  },
+  {
+    "id": "mppesb",
+    "name": "MP Employees Selection Board",
+    "category": "State Jobs",
+    "url": "https://esb.mp.gov.in/e_default.html",
+    "officialDomain": "esb.mp.gov.in",
+    "enabled": true,
+    "priority": "normal"
+  },
+  {
+    "id": "rpsc",
+    "name": "Rajasthan Public Service Commission",
+    "category": "State PSC",
+    "url": "https://rpsc.rajasthan.gov.in/",
+    "officialDomain": "rpsc.rajasthan.gov.in",
+    "enabled": true,
+    "priority": "normal"
+  },
+  {
+    "id": "navy",
+    "name": "Join Indian Navy",
+    "category": "Defence",
+    "url": "https://www.joinindiannavy.gov.in/",
+    "officialDomain": "joinindiannavy.gov.in",
+    "enabled": true,
+    "priority": "normal"
+  },
+  {
+    "id": "airforce",
+    "name": "Indian Air Force",
+    "category": "Defence",
+    "url": "https://indianairforce.nic.in/",
+    "officialDomain": "indianairforce.nic.in",
+    "enabled": true,
+    "priority": "normal"
+  },
+  {
+    "id": "isro",
+    "name": "Indian Space Research Organisation",
+    "category": "PSU & Science",
+    "url": "https://www.isro.gov.in/",
+    "officialDomain": "isro.gov.in",
+    "enabled": true,
+    "priority": "normal"
+  },
+  {
+    "id": "employment-news",
+    "name": "Employment News",
+    "category": "Government Gazette",
+    "url": "https://employmentnews.gov.in/",
+    "officialDomain": "employmentnews.gov.in",
+    "enabled": true,
+    "priority": "normal"
+  }
+]

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Replace the placeholder with the production domain before launch.
+# Sitemap: https://your-domain.example/sitemap.xml

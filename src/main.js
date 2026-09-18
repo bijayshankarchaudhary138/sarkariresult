@@ -367,6 +367,8 @@ let activeTab = 'all';
 let searchTerm = '';
 let countdown = 42;
 let publisherRunning = false;
+let remotePublisherState = null;
+let remoteScanBusy = false;
 
 function render() {
   app.innerHTML = `
@@ -439,7 +441,7 @@ function render() {
               <div class="pulse-metric"><div class="metric-number">12</div><div><span>नई updates आज</span><b>+28% <small>vs last week</small></b></div></div>
               <div class="mini-chart" aria-label="Weekly update activity"><span style="height:31%"></span><span style="height:43%"></span><span style="height:38%"></span><span style="height:57%"></span><span style="height:51%"></span><span style="height:73%"></span><span class="chart-current" style="height:94%"></span></div>
               <div class="pulse-footer"><span>${icon('clock')} Last sync <b id="sync-time">09:42:18 AM</b></span><span class="sync-status"><i></i> All systems go</span></div>
-              <div class="source-strip"><span>Watching official sources</span><span class="source-badges"><b>BPSC</b><b>SSC</b><b>UPSC</b><b>+39</b></span></div>
+              <div class="source-strip"><span>Watching official sources</span><span class="source-badges"><b>BPSC</b><b>SSC</b><b>UPSC</b><b>+11</b></span></div>
             </div>
           </div>
         </section>
@@ -447,7 +449,7 @@ function render() {
         <section class="stats-section">
           <div class="container stats-grid">
             <div class="stat-cell"><span class="stat-icon blue-icon">${icon('briefcase')}</span><div><strong>1,284</strong><span>Active updates</span></div></div>
-            <div class="stat-cell"><span class="stat-icon orange-icon">${icon('globe')}</span><div><strong>42</strong><span>Official sources</span></div></div>
+            <div class="stat-cell"><span class="stat-icon orange-icon">${icon('globe')}</span><div><strong>14</strong><span>Live source feeds</span></div></div>
             <div class="stat-cell"><span class="stat-icon purple-icon">${icon('external')}</span><div><strong>97%</strong><span>Direct source links</span></div></div>
             <div class="stat-cell"><span class="stat-icon green-icon">${icon('lightning')}</span><div><strong>60 sec</strong><span>Avg. publish time</span></div></div>
             <div class="stat-note"><span class="note-spark">✦</span><span><b>Freshness matters.</b><br />हर update को timestamp मिलता है।</span></div>
@@ -494,7 +496,7 @@ function render() {
             <div class="workflow-copy"><div class="section-kicker light-kicker">BUILT FOR SPEED & CLARITY</div><h2>Official खबर से<br /><span>एक-click apply तक।</span></h2><p>नौकरीसेतु का smart workflow candidate की सबसे बड़ी परेशानी हल करता है — सही update को सही समय पर, सही context के साथ सामने लाना।</p><button class="workflow-button" data-action="publisher">Publisher Console खोलें ${icon('arrow')}</button></div>
             <div class="workflow-steps">
               <div class="workflow-line"></div>
-              <div class="workflow-step"><div class="step-number">01</div><div class="step-icon">${icon('globe')}</div><div><b>Official source detect</b><p>42 verified portals पर नया notice आते ही signal मिलता है।</p></div><span class="step-status">LIVE</span></div>
+              <div class="workflow-step"><div class="step-number">01</div><div class="step-icon">${icon('globe')}</div><div><b>Official source detect</b><p>14 allowlisted portals पर नया notice आते ही signal मिलता है।</p></div><span class="step-status">LIVE</span></div>
               <div class="workflow-step"><div class="step-number">02</div><div class="step-icon">${icon('sparkles')}</div><div><b>Human-first article</b><p>एक consistent format में facts, dates और apply steps draft होते हैं।</p></div><span class="step-status">AUTO</span></div>
               <div class="workflow-step"><div class="step-number">03</div><div class="step-icon">${icon('external')}</div><div><b>Publish & apply</b><p>SEO metadata, internal links और official CTA के साथ live करें।</p></div><span class="step-status">READY</span></div>
               <div class="workflow-footnote">${icon('shield')} हर article पर source, timestamp और disclaimer अपने-आप जुड़ता है।</div>
@@ -615,9 +617,49 @@ function handleKeydown(event) {
   document.addEventListener('keydown', handleKeydown, { once: true });
 }
 
-function openArticle(id) {
+function slugifyClient(value = '') {
+  return value.toLowerCase().normalize('NFKD').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-').slice(0, 90) || 'official-update';
+}
+
+function setArticleSeo(item, slug) {
+  const description = `${item.detail || item.title} Official dates, eligibility, important links and verified source details.`;
+  document.title = `${item.title} | नौकरीसेतु`;
+  const descriptionMeta = document.querySelector('meta[name="description"]');
+  descriptionMeta?.setAttribute('content', description);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+  canonical.href = `${window.location.origin}/updates/${slug}`;
+  document.querySelector('#dynamic-article-schema')?.remove();
+  const schema = document.createElement('script');
+  schema.id = 'dynamic-article-schema';
+  schema.type = 'application/ld+json';
+  schema.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: item.title,
+    description,
+    dateModified: new Date().toISOString(),
+    author: { '@type': 'Organization', name: 'नौकरीसेतु Editorial Desk' },
+    publisher: { '@type': 'Organization', name: 'नौकरीसेतु' },
+    mainEntityOfPage: `${window.location.origin}/updates/${slug}`
+  });
+  document.head.appendChild(schema);
+}
+
+function restoreHomeSeo() {
+  document.title = 'नौकरीसेतु — Latest Sarkari Jobs, Results & Admit Card';
+  document.querySelector('meta[name="description"]')?.setAttribute('content', 'नौकरीसेतु पर सरकारी नौकरी, रिजल्ट, एडमिट कार्ड, आंसर की और ऑनलाइन फॉर्म की verified जानकारी — official links के साथ।');
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', 'नौकरीसेतु — हर सरकारी अवसर, एक भरोसेमंद जगह');
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', 'सरकारी नौकरी और परीक्षा अपडेट, official source से सीधे आपके लिए।');
+  document.querySelector('#dynamic-article-schema')?.remove();
+  document.querySelector('link[rel="canonical"]')?.remove();
+}
+
+function openArticle(id, remoteItem = null) {
   const featured = featuredLinks.find(link => link.id === id);
-  const item = updates.find(update => update.id === id) || directoryLookup[id] || {
+  const item = remoteItem || updates.find(update => update.id === id) || directoryLookup[id] || {
     id,
     category: 'jobs',
     categoryLabel: 'Latest Job',
@@ -634,6 +676,13 @@ function openArticle(id) {
     tags: [featured?.meta || 'Recruitment', '2026'],
     official: 'india.gov.in'
   };
+  const articleSlug = item.slug || `${item.id}-${slugifyClient(item.title)}`;
+  if (window.location.pathname !== `/updates/${articleSlug}`) window.history.pushState({ article: articleSlug }, '', `/updates/${articleSlug}`);
+  setArticleSeo(item, articleSlug);
+  const officialHref = item.sourceUrl || (String(item.official || '').startsWith('http') ? item.official : `https://${item.official}`);
+  const detectedDates = item.sourceArticle?.facts?.dates || [];
+  const applyBegin = detectedDates[0] || 'Official notice में देखें';
+  const lastDate = detectedDates[1] || detectedDates[0] || 'Official notice में देखें';
   const modal = document.querySelector('#article-modal');
   modal.innerHTML = `
     <div class="modal-header"><div class="modal-breadcrumb">नौकरीसेतु <span>/</span> ${item.categoryLabel} <span>/</span> Full Information</div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div>
@@ -650,43 +699,132 @@ function openArticle(id) {
       <p>अगर आप <b>${item.title}</b> से जुड़ी latest information खोज रहे हैं, तो यह detailed guide आपके लिए है। किसी भी भर्ती, result, admit card या answer key के मामले में केवल headline देखना पर्याप्त नहीं होता; application window, required qualification, fee, age limit और official instructions को साथ में देखना जरूरी है। हमने इस article को उसी one-page format में व्यवस्थित किया है, जिससे candidate को अलग-अलग pages पर भटकना न पड़े।</p>
       <p>इस page पर दी गई जानकारी candidate convenience के लिए आसान भाषा में है। Notice में बाद में कोई correction, date extension या नया official link आता है, तो source monitor इस page के update record में नया timestamp जोड़ता है। अंतिम eligibility और selection का निर्णय संबंधित विभाग की original notification से ही मान्य होगा।</p>
       <div class="article-highlight-grid"><div><span>${icon('calendar')} Important dates</span><b>Apply window और exam timeline</b></div><div><span>${icon('file')} Direct links</span><b>Official portal तक one click</b></div><div><span>${icon('shield')} Verified source</span><b>${item.official}</b></div></div>
-      <h2>Important Dates</h2><p>नीचे दिए गए dates इस update को समझने के लिए हैं। Apply करने या result check करने से पहले official notice पर latest date जरूर verify करें।</p><div class="sr-table date-table"><div class="sr-table-head"><b>Event</b><b>Date / Status</b></div><div class="sr-table-row"><span>Application / Notice Begin</span><strong>22/09/2026</strong></div><div class="sr-table-row"><span>Last Date for Apply Online</span><strong>14/10/2026</strong></div><div class="sr-table-row"><span>Last Date Pay Exam Fee</span><strong>14/10/2026</strong></div><div class="sr-table-row"><span>Exam / Result / Next Stage</span><strong>Official schedule के अनुसार</strong></div><div class="sr-table-row"><span>Correction / Objection Window</span><strong>Notice में उपलब्ध होने पर</strong></div></div>
+      <h2>Important Dates</h2><p>नीचे दिए गए dates इस update को समझने के लिए हैं। Apply करने या result check करने से पहले official notice पर latest date जरूर verify करें।</p><div class="sr-table date-table"><div class="sr-table-head"><b>Event</b><b>Date / Status</b></div><div class="sr-table-row"><span>Application / Notice Begin</span><strong>${applyBegin}</strong></div><div class="sr-table-row"><span>Last Date for Apply Online</span><strong>${lastDate}</strong></div><div class="sr-table-row"><span>Last Date Pay Exam Fee</span><strong>${lastDate}</strong></div><div class="sr-table-row"><span>Exam / Result / Next Stage</span><strong>Official schedule के अनुसार</strong></div><div class="sr-table-row"><span>Correction / Objection Window</span><strong>Notice में उपलब्ध होने पर</strong></div></div>
       <div class="article-two-col"><section><h2>Application Fee</h2><div class="sr-table compact-table"><div class="sr-table-row"><span>General / OBC / EWS</span><strong>As per notification</strong></div><div class="sr-table-row"><span>SC / ST / PH</span><strong>As per notification</strong></div><div class="sr-table-row"><span>Payment Mode</span><strong>Online fee mode</strong></div></div><p class="small-note">Fee payment के लिए Debit Card, Credit Card, Net Banking या department द्वारा दिए गए माध्यम का उपयोग करें।</p></section><section><h2>Age Limit</h2><div class="sr-table compact-table"><div class="sr-table-row"><span>Minimum Age</span><strong>18 Years</strong></div><div class="sr-table-row"><span>Maximum Age</span><strong>Notification के अनुसार</strong></div><div class="sr-table-row"><span>Age Relaxation</span><strong>Rules के अनुसार</strong></div></div><p class="small-note">Age की गणना और reserved category relaxation के लिए original notification देखें।</p></section></div>
       <h2>Vacancy / Update Details</h2><p>इस update के मुख्य details को नीचे simple table में रखा गया है। अगर किसी particular post, region या category के लिए अलग requirement है, तो notification में दिए गए annexure को जरूर पढ़ें।</p><div class="sr-table vacancy-table"><div class="sr-table-head"><b>Post / Update</b><b>Details</b></div><div class="sr-table-row"><span>${item.categoryLabel}</span><strong>${item.stat}</strong></div><div class="sr-table-row"><span>Department / Board</span><strong>${item.source.split('•')[0].trim()}</strong></div><div class="sr-table-row"><span>Qualification</span><strong>Post के अनुसार 10th / 12th / Graduate</strong></div><div class="sr-table-row"><span>Selection Process</span><strong>Exam, document verification / notice rules</strong></div><div class="sr-table-row"><span>Job / Exam Location</span><strong>India / संबंधित State</strong></div></div>
       <h2>Eligibility और जरूरी Documents</h2><p>Candidate को form भरने से पहले अपनी educational qualification, age, category और experience को official eligibility से match करना चाहिए। सामान्य रूप से नीचे दिए गए documents ready रखने पर application process आसान रहता है:</p><ul class="article-list detailed-list"><li>${icon('check')} शैक्षिक योग्यता की marksheet और certificate</li><li>${icon('check')} Valid photo ID proof: Aadhaar, PAN, Voter ID या अन्य accepted document</li><li>${icon('check')} Recent passport size photograph और signature की scanned file</li><li>${icon('check')} Caste / EWS / PwD / domicile certificate, यदि लागू हो</li><li>${icon('check')} Active mobile number, email ID और fee payment details</li><li>${icon('check')} Result या admit card के लिए registration number / roll number</li></ul>
       <div class="article-callout">${icon('info')} <span><b>Candidate tip:</b> Photo, signature और certificate को prescribed size/format में पहले से resize कर लें। Final submit से पहले preview में नाम, जन्मतिथि, category और uploaded files को दोबारा check करें।</span></div>
       <h2>How to Fill Form / Check Result / Download Admit Card</h2><p>नीचे general step-by-step process है। इस update के अनुसार button का नाम Apply Online, Download Admit Card, View Result या Answer Key हो सकता है:</p><ol class="numbered-list detailed-steps"><li><span>1</span><p>इस page के Important Links section में दिए गए <b>Official Website</b> button को खोलें। Domain और notice title को जरूर match करें।</p></li><li><span>2</span><p>Official portal पर registration / login करें। पहली बार user हैं तो अपना mobile number और email verify करें।</p></li><li><span>3</span><p>Notification को पूरा पढ़ें और अपनी age, qualification, category, district तथा post preference check करें।</p></li><li><span>4</span><p>Form में basic details भरें, documents upload करें और required fee online pay करें। Result/admit card के लिए roll number और date of birth सही डालें।</p></li><li><span>5</span><p>Preview page पर सभी columns ध्यान से check करके final submit करें। गलत जानकारी बाद में correction window के बिना बदल नहीं सकती।</p></li><li><span>6</span><p>Final submitted form, payment receipt, result PDF या admit card को download करके print / PDF में सुरक्षित रखें।</p></li></ol>
-      <h2>Important Links</h2><div class="official-links"><a href="https://${item.official}" target="_blank" rel="noreferrer"><span class="link-icon">${icon('external')}</span><span><b>Official Website / Apply Online</b><small>${item.official} • Direct source link</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon download">${icon('file')}</span><span><b>Download Notification / Details</b><small>Original notice और instructions पढ़ें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon green-link">${icon('calendar')}</span><span><b>Important Dates / Exam Schedule</b><small>Dates को save करके रखें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon purple-link">${icon('shield')}</span><span><b>Official Helpdesk / Objection Link</b><small>केवल department portal पर submit करें</small></span>${icon('arrow')}</a></div>
+      <h2>Important Links</h2><div class="official-links"><a href="${officialHref}" target="_blank" rel="noreferrer"><span class="link-icon">${icon('external')}</span><span><b>Official Website / Apply Online</b><small>${item.official} • Direct source link</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon download">${icon('file')}</span><span><b>Download Notification / Details</b><small>Original notice और instructions पढ़ें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon green-link">${icon('calendar')}</span><span><b>Important Dates / Exam Schedule</b><small>Dates को save करके रखें</small></span>${icon('arrow')}</a><a href="#" data-action="download"><span class="link-icon purple-link">${icon('shield')}</span><span><b>Official Helpdesk / Objection Link</b><small>केवल department portal पर submit करें</small></span>${icon('arrow')}</a></div>
       <h2>Frequently Asked Questions</h2><div class="article-faq"><details open><summary>${item.title} का official link कहां मिलेगा?</summary><p>Official website का direct link इस article के Important Links section में दिया गया है। Apply करने से पहले domain और original notification दोनों verify करें।</p></details><details><summary>क्या इस update में dates बदल सकती हैं?</summary><p>हां, department द्वारा correction, extension या revised schedule जारी किया जा सकता है। इस page का update time और official notice सबसे पहले check करें।</p></details><details><summary>Application submit करने से पहले क्या check करें?</summary><p>Eligibility, category, photo/signature, fee payment, preview और final acknowledgement को जरूर check करें।</p></details><details><summary>क्या यह government official website है?</summary><p>नहीं। नौकरीसेतु एक private information platform है। हम official sources को सरल भाषा में summarize करते हैं; अंतिम निर्णय संबंधित government department की website और notification का होगा।</p></details><details><summary>Notification PDF या admit card download नहीं हो रहा है तो क्या करें?</summary><p>Official portal का server load, browser cache और login details check करें। किसी third-party link पर personal information share न करें।</p></details></div>
       <div class="article-seo-footer"><span>${icon('check')} Content checklist complete</span><span>${icon('external')} Source linked</span><span>${icon('clock')} Last reviewed ${item.date}</span></div><div class="article-disclaimer">${icon('shield')} यह जानकारी candidate convenience के लिए है। नौकरीसेतु किसी सरकारी विभाग, परीक्षा बोर्ड या recruiting agency की official website नहीं है। सभी dates, vacancies, results और links को apply करने से पहले संबंधित official notification से verify करें।</div>
-    </article><aside class="article-aside"><div class="apply-card"><span class="apply-card-label">READY TO TAKE THE NEXT STEP?</span><div class="apply-card-icon">${icon('rocket')}</div><h3>Official portal पर<br />सीधे जाएँ</h3><p>हम आपको source तक पहुंचाते हैं — final decision हमेशा official notice देखकर लें।</p><a class="apply-button" href="https://${item.official}" target="_blank" rel="noreferrer">Official website खोलें ${icon('external')}</a><small>${icon('shield')} Verified domain: ${item.official}</small></div><div class="aside-card article-outline"><b>इस guide में</b><a href="#">Short Information <span>01</span></a><a href="#">Important Dates <span>02</span></a><a href="#">Fee & Eligibility <span>03</span></a><a href="#">How to apply <span>04</span></a><a href="#">Important Links <span>05</span></a><a href="#">FAQ <span>06</span></a></div><div class="aside-source-card">${icon('pulse')}<b>Auto update enabled</b><p>Official source में नया notice detect होने पर update queue में जाता है।</p></div></aside></div>`;
+    </article><aside class="article-aside"><div class="apply-card"><span class="apply-card-label">READY TO TAKE THE NEXT STEP?</span><div class="apply-card-icon">${icon('rocket')}</div><h3>Official portal पर<br />सीधे जाएँ</h3><p>हम आपको source तक पहुंचाते हैं — final decision हमेशा official notice देखकर लें।</p><a class="apply-button" href="${officialHref}" target="_blank" rel="noreferrer">Official website खोलें ${icon('external')}</a><small>${icon('shield')} Verified domain: ${item.official}</small></div><div class="aside-card article-outline"><b>इस guide में</b><a href="#">Short Information <span>01</span></a><a href="#">Important Dates <span>02</span></a><a href="#">Fee & Eligibility <span>03</span></a><a href="#">How to apply <span>04</span></a><a href="#">Important Links <span>05</span></a><a href="#">FAQ <span>06</span></a></div><div class="aside-source-card">${icon('pulse')}<b>Auto update enabled</b><p>Official source में नया notice detect होने पर update queue में जाता है।</p></div></aside></div>`;
   openModal('article-modal');
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
   modal.querySelectorAll('[data-action="share"]').forEach(button => button.addEventListener('click', () => showToast('Article link copy करने की सुविधा ready है')));
   modal.querySelectorAll('[data-action="download"]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); showToast('Official document link open होगा'); }));
 }
 
+function renderSourceRegistry(state = remotePublisherState) {
+  const sourceList = state?.sources?.slice(0, 8) || [
+    { name: 'BPSC Bihar', status: 'waiting' },
+    { name: 'SSC', status: 'waiting' },
+    { name: 'UPSC', status: 'waiting' },
+    { name: 'Railway RRB', status: 'waiting' },
+    { name: 'IBPS', status: 'waiting' },
+    { name: 'NTA', status: 'waiting' }
+  ];
+  return sourceList.map(source => `<span class="registry-chip ${source.status}"><i></i>${source.name}</span>`).join('');
+}
+
+function renderRemoteActivity(state = remotePublisherState) {
+  if (!state?.activities?.length) return '<div class="activity-row"><span class="activity-dot blue"></span><div><b>Waiting for first source scan</b><small>Allowlisted official portals will appear here</small></div><span class="activity-state review">Queued</span></div>';
+  return state.activities.slice(0, 5).map(activity => `<div class="activity-row"><span class="activity-dot ${activity.status === 'error' ? 'orange' : activity.status === 'published' ? 'green' : 'blue'}"></span><div><b>${activity.title}</b><small>${activity.detail || 'Source monitor activity'}</small></div><time>${new Date(activity.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</time><span class="activity-state ${activity.status === 'error' ? 'review' : activity.status === 'published' ? 'published' : 'review'}">${activity.status}</span></div>`).join('');
+}
+
+function applyPublisherState(state) {
+  remotePublisherState = state;
+  state.articles?.map(remoteArticleToItem).forEach(item => {
+    if (!updates.some(update => update.id === item.id)) updates.unshift(item);
+  });
+  if (document.querySelector('#feed-list')) document.querySelector('#feed-list').innerHTML = renderFeed();
+  const online = state.sources?.filter(source => source.status === 'online').length || 0;
+  const highPriority = state.sources?.filter(source => source.priority === 'high' && source.status === 'online').length || 0;
+  const drafts = state.articles?.filter(article => article.status !== 'published').length || 0;
+  const lastScan = state.lastScanFinishedAt ? new Date(state.lastScanFinishedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Waiting';
+  const monitoring = document.querySelector('#publisher-monitoring');
+  if (monitoring) monitoring.innerHTML = `<i></i> Monitoring ${state.activeSourceCount || state.sourceCount || 0} official sources`;
+  const lastScanElement = document.querySelector('#publisher-last-scan');
+  if (lastScanElement) lastScanElement.textContent = `Last scan ${lastScan} • interval ${state.intervalSeconds || 60} sec`;
+  const onlineSummary = document.querySelector('#publisher-online-summary');
+  if (onlineSummary) onlineSummary.innerHTML = `${icon('check')} ${online}/${state.activeSourceCount || state.sourceCount || 0} sources online`;
+  const highPriorityElement = document.querySelector('#publisher-high-priority');
+  if (highPriorityElement) highPriorityElement.innerHTML = `${icon('check')} ${highPriority} high-priority live`;
+  const draftSummary = document.querySelector('#publisher-draft-summary');
+  if (draftSummary) draftSummary.innerHTML = `${icon('check')} ${drafts} article draft(s)`;
+  const liveState = document.querySelector('#publisher-live-state');
+  if (liveState) { liveState.textContent = state.scanRunning ? 'SCANNING' : online ? 'LIVE' : 'CHECK'; liveState.className = `monitor-live ${state.scanRunning ? 'scanning' : online ? '' : 'warning'}`; }
+  const registry = document.querySelector('#source-registry');
+  if (registry) registry.innerHTML = renderSourceRegistry(state);
+  const activityList = document.querySelector('#activity-list');
+  if (activityList) activityList.innerHTML = renderRemoteActivity(state);
+}
+
+async function refreshPublisherState() {
+  try {
+    const response = await fetch('/api/publisher/state', { headers: { accept: 'application/json' } });
+    if (!response.ok) throw new Error('Publisher API unavailable');
+    applyPublisherState(await response.json());
+  } catch {
+    // The static build remains usable when the optional publisher API is not mounted.
+  }
+}
+
+async function runRemoteScan() {
+  if (remoteScanBusy) return;
+  remoteScanBusy = true;
+  const button = document.querySelector('[data-action="scan-now"]');
+  if (button) button.innerHTML = `${icon('pulse')} Scanning...`;
+  try {
+    const response = await fetch('/api/publisher/scan?force=1', { method: 'POST' });
+    if (!response.ok) throw new Error('Scan failed');
+    applyPublisherState(await response.json());
+    showToast('Allowlisted official sources scan complete ✓');
+  } catch {
+    showToast('Source scan API preview mode में उपलब्ध नहीं है');
+  } finally {
+    remoteScanBusy = false;
+    const currentButton = document.querySelector('[data-action="scan-now"]');
+    if (currentButton) currentButton.innerHTML = `${icon('pulse')} Scan now`;
+  }
+}
+
 function openPublisher() {
   const modal = document.querySelector('#publisher-modal');
   modal.innerHTML = `
-    <div class="publisher-shell"><div class="publisher-header"><div><div class="publisher-overline"><span class="live-ring"></span> INTERNAL WORKSPACE <span>•</span> DEMO VIEW</div><h2>Auto Publisher <em>Console</em></h2><p>Official notice से publish-ready article तक का live workflow.</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="publisher-body"><div class="publisher-main"><div class="console-toolbar"><div><span class="console-title">Source monitor</span><span class="console-subtitle">Last scan 09:42:18 AM • interval 60 sec</span></div><span class="monitoring-pill"><i></i> Monitoring 42 official sources</span></div><div class="pipeline-strip"><div class="pipeline-step active"><i>01</i><b>Detect</b><small>official notice</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>02</i><b>Extract</b><small>facts + dates</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>03</i><b>Optimize</b><small>SEO + schema</small></div><span>${icon('arrow')}</span><div class="pipeline-step ready"><i>04</i><b>Publish</b><small>CMS + alert</small></div></div><div class="source-monitor-card"><div class="monitor-head"><span class="monitor-icon">${icon('pulse')}</span><div><b>Official portals</b><small>RSS, sitemap & webhook signals</small></div><span class="monitor-live">LIVE</span></div><div class="source-progress"><span class="progress-fill"></span></div><div class="source-meta"><span>${icon('check')} BPSC checked</span><span>${icon('check')} SSC checked</span><span>${icon('check')} UPSC checked</span><span class="next-scan">Next scan in <b id="publisher-countdown">${countdown}s</b></span></div></div><div class="console-title-row"><span class="console-title">Recent activity</span><button class="refresh-console" data-action="refresh-console">${icon('pulse')} Refresh</button></div><div class="activity-list"><div class="activity-row"><span class="activity-dot green"></span><div><b>BPSC TRE 4.0 notice detected</b><small>Facts extracted • 8 fields verified</small></div><time>2 min</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot blue"></span><div><b>UPSC CDS II Result</b><small>Article draft generated • SEO check passed</small></div><time>1 hr</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot orange"></span><div><b>SSC CGL update</b><small>Awaiting final source confirmation</small></div><time>1 hr</time><span class="activity-state review">Review</span></div></div></div><aside class="publisher-aside"><div class="publish-score"><div class="score-ring"><strong>92</strong><small>/100</small></div><b>Content health</b><span>SEO & source checks passed</span><div class="score-bars"><i style="width:96%"></i><i style="width:88%"></i><i style="width:93%"></i></div><small class="score-labels">Source <span>Structure</span> Links</small></div><div class="publish-settings"><span class="console-title">Publishing rules</span><label><span>Auto-publish after source verification</span><input type="checkbox" checked><i></i></label><label><span>Add FAQ + JSON-LD</span><input type="checkbox" checked><i></i></label><label><span>Send candidate alert</span><input type="checkbox" checked><i></i></label><button class="test-button" data-action="test-publish">Test publish flow ${icon('arrow')}</button></div></aside></div><div class="publisher-footer"><span>${icon('info')} Production setup में RSS/webhook credentials और CMS API जोड़ें।</span><span class="publisher-footer-links">Docs <i></i> Integrations</span></div></div>`;
+    <div class="publisher-shell"><div class="publisher-header"><div><div class="publisher-overline"><span class="live-ring"></span> INTERNAL WORKSPACE <span>•</span> PREVIEW API</div><h2>Auto Publisher <em>Console</em></h2><p>Official notice से publish-ready article तक का live workflow.</p></div><button class="close-button" data-action="close-modal" aria-label="Close">${icon('x')}</button></div><div class="publisher-body"><div class="publisher-main"><div class="console-toolbar"><div><span class="console-title">Source monitor</span><span class="console-subtitle" id="publisher-last-scan">Last scan loading • interval 60 sec</span></div><span class="monitoring-pill" id="publisher-monitoring"><i></i> Monitoring sources</span></div><div class="pipeline-strip"><div class="pipeline-step active"><i>01</i><b>Detect</b><small>official notice</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>02</i><b>Extract</b><small>facts + dates</small></div><span>${icon('arrow')}</span><div class="pipeline-step active"><i>03</i><b>Optimize</b><small>SEO + schema</small></div><span>${icon('arrow')}</span><div class="pipeline-step ready"><i>04</i><b>Publish</b><small>CMS + alert</small></div></div><div class="source-monitor-card"><div class="monitor-head"><span class="monitor-icon">${icon('pulse')}</span><div><b>Official portals</b><small>RSS, sitemap & webhook signals</small></div><span class="monitor-live" id="publisher-live-state">LIVE</span></div><div class="source-progress"><span class="progress-fill"></span></div><div class="source-meta"><span id="publisher-online-summary">${icon('check')} Source status loading</span><span id="publisher-high-priority">${icon('check')} High-priority sources</span><span id="publisher-draft-summary">${icon('check')} Draft queue ready</span><span class="next-scan">Next scan in <b id="publisher-countdown">${countdown}s</b></span></div><div class="source-registry" id="source-registry"></div></div><div class="console-title-row"><span class="console-title">Recent activity</span><button class="refresh-console" data-action="scan-now">${icon('pulse')} Scan now</button></div><div class="activity-list" id="activity-list"><div class="activity-row"><span class="activity-dot green"></span><div><b>BPSC TRE 4.0 notice detected</b><small>Facts extracted • 8 fields verified</small></div><time>2 min</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot blue"></span><div><b>UPSC CDS II Result</b><small>Article draft generated • SEO check passed</small></div><time>1 hr</time><span class="activity-state published">Published</span></div><div class="activity-row"><span class="activity-dot orange"></span><div><b>SSC CGL update</b><small>Awaiting final source confirmation</small></div><time>1 hr</time><span class="activity-state review">Review</span></div></div></div><aside class="publisher-aside"><div class="publish-score"><div class="score-ring"><strong>92</strong><small>/100</small></div><b>Content health</b><span>SEO & source checks passed</span><div class="score-bars"><i style="width:96%"></i><i style="width:88%"></i><i style="width:93%"></i></div><small class="score-labels">Source <span>Structure</span> Links</small></div><div class="publish-settings"><span class="console-title">Publishing rules</span><label><span>Auto-publish after source verification</span><input type="checkbox" checked><i></i></label><label><span>Add FAQ + JSON-LD</span><input type="checkbox" checked><i></i></label><label><span>Send candidate alert</span><input type="checkbox" checked><i></i></label><button class="test-button" data-action="test-publish">Publish selected draft ${icon('arrow')}</button></div></aside></div><div class="publisher-footer"><span>${icon('info')} Production setup में RSS/webhook credentials और CMS API जोड़ें।</span><span class="publisher-footer-links">Docs <i></i> Integrations</span></div></div>`;
   openModal('publisher-modal');
   modal.querySelector('[data-action="close-modal"]').addEventListener('click', closeModals);
   modal.querySelector('[data-action="test-publish"]').addEventListener('click', runPublishDemo);
-  modal.querySelector('[data-action="refresh-console"]').addEventListener('click', () => showToast('42 official sources फिर से check किए गए ✓'));
+  modal.querySelector('[data-action="scan-now"]').addEventListener('click', runRemoteScan);
+  refreshPublisherState();
 }
 
-function runPublishDemo() {
+async function runPublishDemo() {
   if (publisherRunning) return;
   publisherRunning = true;
   const button = document.querySelector('[data-action="test-publish"]');
-  button.innerHTML = `${icon('pulse')} Running checks...`;
-  setTimeout(() => {
-    button.innerHTML = `${icon('check')} Published in 48 sec`;
-    button.classList.add('success');
-    showToast('Demo article successfully published ✓');
+  const selected = remotePublisherState?.articles?.find(article => article.status !== 'published');
+  if (button) button.innerHTML = `${icon('pulse')} Running checks...`;
+  try {
+    if (selected) {
+      const response = await fetch('/api/publisher/publish', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: selected.id }) });
+      if (!response.ok) throw new Error('Publish failed');
+      await refreshPublisherState();
+      showToast('Verified source article published ✓');
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      showToast('No verified draft yet — demo checks complete');
+    }
+  } catch {
+    showToast('Publish API unavailable — draft अभी review में है');
+  } finally {
+    if (button) {
+      button.innerHTML = `${icon('check')} ${selected ? 'Publish selected draft' : 'Waiting for draft'} ${icon('arrow')}`;
+      if (selected) button.classList.add('success');
+    }
     publisherRunning = false;
-  }, 1200);
+  }
 }
 
 function openModal(id) {
@@ -700,6 +838,10 @@ function closeModals() {
   document.querySelector('#article-modal').hidden = true;
   document.querySelector('#publisher-modal').hidden = true;
   document.body.classList.remove('modal-open');
+  if (window.location.pathname.startsWith('/updates/')) {
+    window.history.pushState({}, '', '/');
+    restoreHomeSeo();
+  }
 }
 
 function showToast(message) {
@@ -710,16 +852,63 @@ function showToast(message) {
   window.toastTimer = setTimeout(() => toast.classList.remove('show'), 3300);
 }
 
+function remoteArticleToItem(article) {
+  return {
+    id: article.id,
+    slug: article.slug,
+    category: 'jobs',
+    categoryLabel: article.category || 'Official Update',
+    source: `${article.sourceName} • Official source`,
+    title: article.title,
+    detail: article.sections?.overview || `Official update detected from ${article.officialDomain}.`,
+    stat: article.facts?.dates?.[0] || 'Official notice',
+    status: article.status === 'published' ? 'Published' : 'Source review',
+    statusClass: article.confidence === 'high' ? 'green' : 'amber',
+    date: new Date(article.updatedAt || article.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+    time: 'Live source',
+    color: 'blue',
+    icon: 'file',
+    tags: [article.category || 'Update', 'Official'],
+    official: article.officialDomain,
+    sourceUrl: article.sourceUrl,
+    sourceArticle: article
+  };
+}
+
+async function handleArticleRoute() {
+  if (!window.location.pathname.startsWith('/updates/')) return;
+  const slug = decodeURIComponent(window.location.pathname.replace(/^\/updates\//, ''));
+  const localItems = [...updates, ...Object.values(directoryLookup), ...featuredLinks];
+  const local = localItems.find(item => `${item.id}-${slugifyClient(item.title || '')}` === slug || item.slug === slug);
+  if (local) {
+    openArticle(local.id);
+    return;
+  }
+  try {
+    const response = await fetch(`/api/publisher/article/${encodeURIComponent(slug)}`);
+    if (response.ok) openArticle(slug, remoteArticleToItem(await response.json()));
+  } catch {
+    showToast('Article source अभी load नहीं हो पाया');
+  }
+}
+
+window.addEventListener('popstate', () => {
+  if (window.location.pathname.startsWith('/updates/')) handleArticleRoute();
+  else closeModals();
+});
+
 function tick() {
   countdown -= 1;
   if (countdown <= 0) {
     countdown = 60;
     document.querySelector('#sync-time')?.replaceChildren(document.createTextNode(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })));
-    showToast('Feed refreshed — 1 नई update signal मिली');
+    if (remotePublisherState) runRemoteScan();
+    showToast('Feed refreshed — official source scan cycle complete');
   }
   document.querySelector('#countdown')?.replaceChildren(document.createTextNode(`${countdown}s`));
   document.querySelector('#publisher-countdown')?.replaceChildren(document.createTextNode(`${countdown}s`));
 }
 
 render();
+handleArticleRoute();
 setInterval(tick, 1000);
