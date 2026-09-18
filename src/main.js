@@ -902,11 +902,14 @@ function showToast(message) {
 }
 
 function remoteArticleToItem(article) {
+  const signal = `${article.title} ${article.facts?.noticeTitle || ''} ${article.sourceUrl || ''}`.toLowerCase();
+  const category = /answer\s*key|response\s*sheet|objection/.test(signal) ? 'answer' : /admit\s*card|hall\s*ticket|exam\s*city/.test(signal) ? 'admit' : /result|merit\s*list|score\s*card|cut[-\s]?off/.test(signal) ? 'results' : 'jobs';
+  const categoryLabel = { jobs: 'Latest Jobs', results: 'Result', admit: 'Admit Card', answer: 'Answer Key' }[category];
   return {
     id: article.id,
     slug: article.slug,
-    category: 'jobs',
-    categoryLabel: article.category || 'Official Update',
+    category,
+    categoryLabel: `${categoryLabel} • ${article.category || 'Official Update'}`,
     source: `${article.sourceName} • Official source`,
     title: article.title,
     hindiTitle: article.title,
